@@ -43,6 +43,10 @@ const Reservasi = sequelize.define('reservasi', {
         type: DataTypes.INTEGER,
         allowNull: false
     },
+    keterangan:{
+        type:DataTypes.STRING,
+        allowNull: true
+    },
     created_at:{
         type: DataTypes.DATE
     },
