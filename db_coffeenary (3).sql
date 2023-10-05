@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Waktu pembuatan: 05 Okt 2023 pada 09.33
+-- Waktu pembuatan: 05 Okt 2023 pada 09.54
 -- Versi server: 10.4.27-MariaDB
 -- Versi PHP: 8.2.0
 
@@ -78,6 +78,7 @@ CREATE TABLE `user` (
   `email` varchar(50) NOT NULL,
   `no_telp` varchar(13) NOT NULL,
   `foto` varchar(255) DEFAULT NULL,
+  `role` int(11) NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -86,9 +87,9 @@ CREATE TABLE `user` (
 -- Dumping data untuk tabel `user`
 --
 
-INSERT INTO `user` (`id_user`, `full_name`, `username`, `password`, `email`, `no_telp`, `foto`, `created_at`, `updated_at`) VALUES
-(1, 'nadini annisa byant', 'dindini', '$2b$10$XFHiOJGK606vd3tO4Y5KJOEkl1G/.x7WzsgP1lGOS1Ef9dzMkGBji', 'nadini123@gmail.com', '32423432', 'Hero Section.jpg', '2023-09-30 15:14:25', '2023-10-01 10:35:38'),
-(2, 'nadini', 'dini aja', '$2b$10$sU6kNLBcE8IT2Ihs9srtXuT8MnHBnWTEq.DXC4C.6sQppSQS43WLW', 'nadini12@gmail.com', '324234326', NULL, '2023-09-30 15:16:29', '2023-09-30 15:16:29');
+INSERT INTO `user` (`id_user`, `full_name`, `username`, `password`, `email`, `no_telp`, `foto`, `role`, `created_at`, `updated_at`) VALUES
+(1, 'nadini annisa byant', 'dindini', '$2b$10$XFHiOJGK606vd3tO4Y5KJOEkl1G/.x7WzsgP1lGOS1Ef9dzMkGBji', 'nadini123@gmail.com', '32423432', 'Hero Section.jpg', 0, '2023-09-30 15:14:25', '2023-10-01 10:35:38'),
+(2, 'nadini', 'dini aja', '$2b$10$sU6kNLBcE8IT2Ihs9srtXuT8MnHBnWTEq.DXC4C.6sQppSQS43WLW', 'nadini12@gmail.com', '324234326', NULL, 0, '2023-09-30 15:16:29', '2023-09-30 15:16:29');
 
 --
 -- Indexes for dumped tables
