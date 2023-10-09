@@ -63,6 +63,7 @@ const register = async (req, res) => {
                     password: hashedPassword,
                     email: email,
                     no_telp: phoneNumber,
+                    role: 1
                 })
 
                 if (addUser) {
@@ -104,7 +105,9 @@ const login = async (req, res) => {
             }
         })
 
-        if (findEmail) {
+        const role = findEmail.role
+
+        if (findEmail && role == 0) {
             const getpass = findEmail.password
             const id_user = findEmail.id_user
 
@@ -135,11 +138,48 @@ const login = async (req, res) => {
                         message: 'Login Successful',
                         token: token,
                         success: true,
-                        id_user: req.session.id_user
+                        id_user: req.session.id_user,
+                        role: 'admin'
                     });
                 }
             })
 
+        } else if (findEmail && role == 1) {
+            const getpass = findEmail.password
+            const id_user = findEmail.id_user
+
+            bcrypt.compare(password, getpass, async (err, result) => {
+                if (err || !result) {
+                    res.status(400).json({
+                        success: false,
+                        message: 'Password Wrong'
+                    })
+                } else {
+                    const token = jwt.sign({
+                            id_user: id_user,
+                            email
+                        },
+                        process.env.ACCESS_TOKEN_SECRET, {
+                            expiresIn: '2h'
+                        }
+                    );
+
+                    req.session.id_user = id_user
+
+                    res.cookie('token', token, {
+                        httpOnly: true,
+                        maxAge: 2 * 60 * 60 * 1000,
+                    });
+
+                    res.status(200).json({
+                        message: 'Login Successful',
+                        token: token,
+                        success: true,
+                        id_user: req.session.id_user,
+                        role: 'user'
+                    });
+                }
+            })
         } else {
             res.status(400).json({
                 success: false,
