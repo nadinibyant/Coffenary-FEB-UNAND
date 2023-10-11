@@ -19,14 +19,14 @@ const Reservasi = sequelize.define('reservasi', {
             key: 'id_user'
         }
     },
-    nomor_meja:{
-        type: DataTypes.INTEGER,
-        allowNull: false,
-        references:{
-            model:Meja,
-            key: 'nomor_meja'
-        }
-    },
+    // nomor_meja:{
+    //     type: DataTypes.INTEGER,
+    //     allowNull: false,
+    //     references:{
+    //         model:Meja,
+    //         key: 'nomor_meja'
+    //     }
+    // },
     tanggal_reservasi:{
         type: DataTypes.DATE,
         allowNull: false
@@ -46,6 +46,10 @@ const Reservasi = sequelize.define('reservasi', {
     keterangan:{
         type:DataTypes.STRING,
         allowNull: true
+    },
+    status:{
+        type:DataTypes.STRING,
+        allowNull: false
     },
     created_at:{
         type: DataTypes.DATE
