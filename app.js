@@ -27,6 +27,7 @@ app.use(express.static(path.join(__dirname, 'views')));
 app.use('/', server.user)
 app.use('/', server.table)
 app.use('/', server.profile)
+app.use('/', server.admin)
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
