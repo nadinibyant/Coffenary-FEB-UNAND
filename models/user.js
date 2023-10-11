@@ -38,6 +38,10 @@ const User = sequelize.define('user', {
     },
     updated_at:{
         type: DataTypes.DATE
+    },
+    role:{
+        type: DataTypes.INTEGER,
+        allowNull: false
     }
 }, {
     tableName: 'user',
