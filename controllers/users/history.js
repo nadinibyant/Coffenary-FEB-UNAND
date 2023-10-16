@@ -27,7 +27,7 @@ const verifyToken = (req, res, next) => {
 const historyView = async (req, res) => {
     res.render('users/history/history')
 }
-controllers.historyView = [verifyToken, historyView]
+controllers.historyView =  [verifyToken,historyView]
 
 const allDataHistory = async (req, res) => {
     const id_user = req.session.id_user
@@ -67,7 +67,8 @@ const allDataHistory = async (req, res) => {
                 res.status(200).json({
                     success: true,
                     dataHistory: dataHistory,
-                    nomor_meja: nomor_meja
+                    nomor_meja: nomor_meja,
+                    keterangan: keterangan
                 })
             } else {
                 res.status(400).json({

@@ -8,6 +8,11 @@ const bcrypt = require('bcrypt')
 const path = require('path')
 const moment = require('moment-timezone');
 const jwt = require('jsonwebtoken')
+const User = require('../../models/user')
+const Meja = require('../../models/meja')
+const {
+    Op
+} = require('sequelize');
 
 const verifyToken = (req, res, next) => {
     const token = req.cookies.token;
@@ -26,9 +31,9 @@ const verifyToken = (req, res, next) => {
 };
 
 const reservationHistoryView = async (req, res) => {
-        res.render('admin/history/history')
+    res.render('admin/history/history')
 }
-controllers.reservationHistoryView = [verifyToken, reservationHistoryView] 
+controllers.reservationHistoryView = [verifyToken, reservationHistoryView]
 
 const allReservationData = async (req, res) => {
     const allReservation = await Reservasi.findAll()
@@ -220,5 +225,154 @@ const reject = async (req, res) => {
     }
 }
 controllers.reject = reject
+
+const editReservationView = async (req, res) => {
+    res.render('admin/history/editHistory')
+}
+controllers.editReservationView = [verifyToken,editReservationView]
+
+const getDetailReservasi = async (req, res) => {
+    const id_reservasi = req.params.id_reservasi
+    const findReservasi = await Reservasi.findByPk(id_reservasi)
+    if (findReservasi) {
+        const id_user = findReservasi.id_user
+        const id_meja = findReservasi.id_meja
+        const tanggal_reservasi = findReservasi.tanggal_reservasi
+        const jam_mulai = findReservasi.jam_mulai
+
+        const findUser = await User.findByPk(id_user)
+        if (findUser) {
+            const full_name = findUser.full_name
+
+            const findMeja = await Meja.findByPk(id_meja)
+            if (findMeja) {
+                const nomor_meja = findMeja.nomor_meja
+
+                const findAllMeja = await Meja.findAll()
+                if (findAllMeja.length > 0) {
+                    const dataNomorMeja = findAllMeja.map((Meja) => ({
+                        nomor_meja: Meja.nomor_meja
+                    }))
+
+                    res.status(200).json({
+                        success: true,
+                        dataReservasi: {
+                            full_name: full_name,
+                            nomor_meja: nomor_meja,
+                            tanggal_reservasi: tanggal_reservasi,
+                            jam_mulai: jam_mulai
+                        },
+                        dataNomorMeja: dataNomorMeja
+                    })
+                } else {
+                    res.status(400).json({
+                        success: false,
+                        message: 'Table not Found'
+                    })
+                }
+
+            } else {
+                res.status(400).json({
+                    success: false,
+                    message: 'Table not Found'
+                })
+            }
+
+
+        } else {
+            res.status(400).json({
+                success: false,
+                message: 'User not Found'
+            })
+        }
+    } else {
+        res.status(400).json({
+            success: false,
+            message: 'Reservation Data not Found'
+        })
+    }
+}
+controllers.getDetailReservasi = getDetailReservasi
+
+const editReservation = async (req, res) => {
+    const id_reservasi = req.params.id_reservasi
+    const nomor_meja = req.body.nomor_meja
+
+    if (!nomor_meja) {
+        res.status(400).json({
+            success: false,
+            message: 'Complete The Empty Data Input'
+        })
+    } else {
+        const getTglReservasi = await Reservasi.findByPk(id_reservasi)
+        if (getTglReservasi) {
+            const tanggal_reservasi = getTglReservasi.tanggal_reservasi
+            const tanggal_Reservasi_objek = new Date(tanggal_reservasi)
+            const tanggal_reservasi_database = new Date(tanggal_Reservasi_objek.toISOString());
+            console.log(tanggal_reservasi_database)
+
+            const jam_mulai = getTglReservasi.jam_mulai
+
+            const getIdMeja = await Meja.findOne({
+                where: {
+                    nomor_meja: nomor_meja
+                }
+            })
+
+            if (getIdMeja) {
+                const id_meja = getIdMeja.id_meja
+
+                const findReservasi = await Reservasi.findOne({
+                    where: {
+                        id_meja: id_meja,
+                        tanggal_reservasi: tanggal_reservasi_database,
+                        jam_mulai: jam_mulai
+                    }
+                })
+
+                if (findReservasi) {
+                    res.status(400).json({
+                        success: false,
+                        message: 'The table has been booked'
+                    })
+                } else {
+                    const keterangan = `Your reservation table has been moved to number ${nomor_meja}`
+                    const updateReservasi = await Reservasi.update({
+                        id_meja: id_meja,
+                        keterangan: keterangan
+                    }, {
+                        where: {
+                            id_reservasi: id_reservasi
+                        }
+                    })
+
+                    if (updateReservasi) {
+                        res.status(200).json({
+                            success: true,
+                            message: 'Reservation data updated successfully',
+                            keterangan: keterangan
+                        })
+                    } else {
+                        res.status(400).json({
+                            success: true,
+                            message: 'Reservation data was not updated successfully'
+                        })
+                    }
+                }
+            } else {
+                res.status(400).json({
+                    success: false,
+                    message: 'Table not Found'
+                })
+            }
+        } else {
+            res.status(400).json({
+                success: false,
+                message: 'Reservation Date not Found'
+            })
+        }
+    }
+}
+controllers.editReservation = editReservation
 
 module.exports = controllers

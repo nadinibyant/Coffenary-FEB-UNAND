@@ -25,7 +25,7 @@ const verifyToken = (req, res, next) => {
 };
 
 const profileView = async (req, res) => {
-        res.render('admin/profile/profile')
+    res.render('admin/profile/profile')
 }
 controllers.profileView = [verifyToken, profileView]
 
@@ -74,7 +74,7 @@ const upload = multer({
 const uploadd = upload.single('file')
 
 const editProfile = async (req, res) => {
-    const id_user = 3
+    const id_user = req.session.id_user
 
     const findUser = await User.findByPk(id_user)
     if (findUser) {
@@ -92,7 +92,7 @@ const editProfile = async (req, res) => {
         const no_telp = req.body.no_telp || oldPhone
         const email = req.body.email || oldEmail
         const password = req.body.password || oldPassword
-        const confirm = req.body.confirm || oldPassword
+        const confirm = req.body.confirm
 
         const findUsername = await User.findOne({
             where: {
@@ -100,7 +100,103 @@ const editProfile = async (req, res) => {
             }
         })
 
-        if (password == confirm) {
+        if (confirm) {
+            if (password == confirm) {
+                if (email == oldEmail) {
+                    const salt = bcrypt.genSaltSync(10)
+                    const hashedPassword = bcrypt.hashSync(password, salt)
+
+                    if (foto == null) {
+                        const updateProfile = await User.update({
+                            full_name: full_name,
+                            username: username,
+                            no_telp: no_telp,
+                            foto: foto,
+                            password: hashedPassword
+                        }, {
+                            where: {
+                                id_user: id_user
+                            }
+                        })
+
+                        if (updateProfile) {
+                            res.status(200).json({
+                                success: true,
+                                message: 'Data updated successfully'
+                            })
+                        } else {
+                            res.status(400).json({
+                                success: false,
+                                message: 'Account change did not work'
+                            })
+                        }
+                    } else {
+                        const updateProfile = await User.update({
+                            full_name: full_name,
+                            username: username,
+                            no_telp: no_telp,
+                            foto: foto.originalname,
+                            password: hashedPassword
+                        }, {
+                            where: {
+                                id_user: id_user
+                            }
+                        })
+
+                        if (updateProfile) {
+                            res.status(200).json({
+                                success: true,
+                                message: 'Data updated successfully'
+                            })
+                        } else {
+                            res.status(400).json({
+                                success: false,
+                                message: 'Account change did not work'
+                            })
+                        }
+                    }
+
+                } else if (findUsername) {
+                    res.status(400).json({
+                        success: false,
+                        message: 'username is already in use'
+                    })
+                } else {
+                    const salt = bcrypt.genSaltSync(10)
+                    const hashedPassword = bcrypt.hashSync(password, salt)
+
+                    const updateProfile = await User.update({
+                        full_name: full_name,
+                        username: username,
+                        no_telp: no_telp,
+                        foto: foto.originalname,
+                        password: hashedPassword,
+                        email: email
+                    }, {
+                        where: {
+                            id_user: id_user
+                        }
+                    })
+
+                    if (updateProfile) {
+                        res.status(200).json({
+                            success: true,
+                            message: 'Data updated successfully'
+                        })
+                    } else {
+                        res.status(400).json({
+                            success: false,
+                            message: 'Account change did not work'
+                        })
+                    }
+                }
+            } else {
+                res.status(400).json({
+                    success: false,
+                    message: "Password and confirm password don't match"
+                })
+            }
+        } else {
             if (email == oldEmail) {
                 const salt = bcrypt.genSaltSync(10)
                 const hashedPassword = bcrypt.hashSync(password, salt)
@@ -189,12 +285,8 @@ const editProfile = async (req, res) => {
                     })
                 }
             }
-        } else {
-            res.status(400).json({
-                success: false,
-                message: "Password and confirm password don't match"
-            })
         }
+
     } else {
         res.status(400).json({
             success: false,
