@@ -1,6 +1,6 @@
 const express = require('express')
 const router = express.Router()
-const controllers = require('../controllers/admin/profile')
+const controllers = require('../controllers/profile')
 
 router.get('/profile', controllers.profileView)
 router.get('/dataProfile', controllers.getDataProfile)
