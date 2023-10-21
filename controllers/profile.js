@@ -752,7 +752,7 @@ const logout = async (req, res) => {
 controllers.logout = [verifyToken, logout]
 
 const getNama = async (req, res) => {
-    const id_user = 3
+    const id_user = req.session.id_user
     const findUser = await User.findByPk(id_user)
     if (findUser) {
         res.status(200).json({
