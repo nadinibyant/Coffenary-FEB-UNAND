@@ -74,7 +74,7 @@ const upload = multer({
 const uploadd = upload.single('file')
 
 const editProfile = async (req, res) => {
-    const id_user = 9
+    const id_user = req.session.id_user
 
     const findUser = await User.findByPk(id_user)
     if (findUser) {
