@@ -156,7 +156,7 @@ const login = async (req, res) => {
                         });
                     }
                 })
-            } else {
+            } else if (role == 1){
                 const getpass = findUsername.password
                 const id_user = findUsername.id_user
 

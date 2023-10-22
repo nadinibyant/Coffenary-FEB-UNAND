@@ -25,12 +25,26 @@ const verifyToken = (req, res, next) => {
 };
 
 const manageView = async (req, res) => {
-    res.render('admin/manage/readTable')
+    try {
+        const findUser = await User.findOne({
+            id_user: req.session.id_user
+        })
+
+        if (!findUser) {
+            return res.redirect('/login')
+        }
+        const user = findUser.username;
+        res.render('admin/manage/readTable', {
+            user
+        })
+    } catch (error) {
+        return res.redirect('/login')
+    }
 }
 controllers.manageView = [verifyToken, manageView]
 
 const addTableView = async (req, res) => {
-    res.render('admin/manage/createTable')
+     res.render('admin/manage/createTable')
 }
 controllers.addTableView = [verifyToken, addTableView]
 
@@ -40,28 +54,36 @@ const editTableView = async (req, res) => {
 controllers.editTableView = [verifyToken, editTableView]
 
 const allTableData = async (req, res) => {
-    const allTable = await Meja.findAll()
+    try{
+        const allTable = await Meja.findAll()
 
-    if (allTable.length > 0) {
-        const data = allTable.map((dataTable) => ({
-            id_meja: dataTable.id_meja,
-            nomor_meja: dataTable.nomor_meja,
-            foto_meja: dataTable.foto_meja,
-            jumlah_kursi: dataTable.jumlah_kursi,
-            created_at: dataTable.created_at,
-            updated_at: dataTable.updated_at
-        }))
-
-        res.status(200).json({
-            success: true,
-            data: data
-        })
-    } else {
-        res.status(400).json({
-            success: false,
-            message: 'Table data is not available'
-        })
-    }
+        if (allTable.length > 0) {
+            const data = allTable.map((dataTable) => ({
+                id_meja: dataTable.id_meja,
+                nomor_meja: dataTable.nomor_meja,
+                foto_meja: dataTable.foto_meja,
+                jumlah_kursi: dataTable.jumlah_kursi,
+                created_at: dataTable.created_at,
+                updated_at: dataTable.updated_at
+            }))
+    
+            res.status(200).json({
+                success: true,
+                data: data
+            })
+            
+        } else {
+            res.status(400).json({
+                success: false,
+                message: 'Table data is not available'
+            })
+        }
+    } catch (error) {
+        res.status(500).json({
+          success: false,
+          message: 'Server Eror'
+        });
+    }  
 }
 controllers.allTableData = allTableData
 
@@ -91,14 +113,14 @@ const upload = multer({
 const uploadd = upload.single('file')
 
 const addTable = async (req, res) => {
-    const foto_meja = req.file
-    const nomor_meja = req.body.nomor_meja
-    const jumlah_kursi = req.body.jumlah_kursi
+    const file = req.file
+    const numberTable = req.body.numberTable
+    const numberSeats = req.body.numberSeats
 
-    if (foto_meja && nomor_meja && jumlah_kursi) {
+    if (file && numberTable && numberSeats) {
         const findTable = await Meja.findOne({
             where: {
-                nomor_meja: nomor_meja
+                nomor_meja: numberTable
             }
         })
 
@@ -109,9 +131,9 @@ const addTable = async (req, res) => {
             })
         } else {
             const addData = await Meja.create({
-                nomor_meja: nomor_meja,
-                foto_meja: foto_meja.originalname,
-                jumlah_kursi: jumlah_kursi
+                nomor_meja: numberTable,
+                foto_meja: file.originalname,
+                jumlah_kursi: numberSeats
             })
 
             if (addData) {
@@ -170,34 +192,31 @@ const editTable = async (req, res) => {
         const oldNumberSeats = findTable.jumlah_kursi
         const oldFile = findTable.foto_meja
 
-        const nomor_meja = req.body.nomor_meja || oldNumberTable
-        const jumlah_kursi = req.body.jumlah_kursi || oldNumberSeats
-        const foto_meja = req.file || oldFile
+        const numberTable = req.body.numberTable || oldNumberTable
+        const numberSeats = req.body.numberSeats || oldNumberSeats
+        const file = req.file || oldFile
 
         const findNumberTable = await Meja.findOne({
             where: {
-                nomor_meja: nomor_meja
+                nomor_meja: numberTable
             }
         })
 
-        if (nomor_meja == oldNumberTable) {
+        if (numberTable == oldNumberTable) {
             const updateData = await Meja.update({
-                nomor_meja: nomor_meja,
-                foto_meja: foto_meja.originalname,
-                jumlah_kursi: jumlah_kursi
+                nomor_meja: numberTable,
+                foto_meja: file.originalname,
+                jumlah_kursi: numberSeats
             }, {
                 where: {
                     id_meja: id_meja
                 }
             })
 
-            const findMeja = await Meja.findByPk(id_meja)
-
             if (updateData) {
                 res.status(200).json({
                     success: true,
                     message: 'Table data updated successfully',
-                    data: findMeja
                 })
             } else if (findNumberTable) {
                 res.status(400).json({
@@ -217,9 +236,9 @@ const editTable = async (req, res) => {
             })
         } else {
             const updateData = await Meja.update({
-                nomor_meja: nomor_meja,
-                foto_meja: foto_meja.originalname,
-                jumlah_kursi: jumlah_kursi
+                nomor_meja: numberTable,
+                foto_meja: file.originalname,
+                jumlah_kursi: numberSeats
             }, {
                 where: {
                     id_meja: id_meja
@@ -255,31 +274,40 @@ controllers.editTable = [uploadd, editTable]
 const deleteTable = async (req, res) => {
     const id_meja = req.params.id_meja
 
-    const findTable = await Meja.findByPk(id_meja)
-    if (findTable) {
-        const delTable = await Meja.destroy({
-            where: {
-                id_meja: id_meja
-            }
-        })
-
-        if (delTable) {
-            res.status(200).json({
-                success: true,
-                message: 'Data deleted successfully'
+    try{
+        const findTable = await Meja.findByPk(id_meja)
+        if (findTable) {
+            const delTable = await Meja.destroy({
+                where: {
+                    id_meja: id_meja
+                }
             })
+    
+            if (delTable) {
+                res.status(200).json({
+                    success: true,
+                    message: 'Data deleted successfully'
+                })
+            } else {
+                res.status(400).json({
+                    success: false,
+                    message: 'data was not deleted successfully'
+                })
+            }
         } else {
             res.status(400).json({
                 success: false,
-                message: 'data was not deleted successfully'
+                message: 'Data not found'
             })
         }
-    } else {
-        res.status(400).json({
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({
             success: false,
-            message: 'Data not found'
-        })
+            message: 'Internal server error'
+        });
     }
+    
 }
 controllers.deleteTable = deleteTable
 

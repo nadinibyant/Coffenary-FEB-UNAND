@@ -27,7 +27,7 @@ const verifyToken = (req, res, next) => {
 const historyView = async (req, res) => {
     res.render('users/history/history')
 }
-controllers.historyView =  [verifyToken,historyView]
+controllers.historyView = [verifyToken, historyView]
 
 const allDataHistory = async (req, res) => {
     const id_user = req.session.id_user
@@ -40,12 +40,13 @@ const allDataHistory = async (req, res) => {
         })
         if (findHistory.length > 0) {
             const dataHistory = findHistory.map((history) => ({
-                tanngal_reservasi: history.tanggal_reservasi,
+                tanggal_reservasi: history.tanggal_reservasi,
                 jam_mulai: history.jam_mulai,
                 jam_selesai: history.jam_selesai,
                 id_meja: history.id_meja,
                 jumlah_orang: history.jumlah_orang,
                 status: history.status,
+                keterangan: history.keterangan,
                 id_reservasi: history.id_reservasi
             }))
 
@@ -67,8 +68,7 @@ const allDataHistory = async (req, res) => {
                 res.status(200).json({
                     success: true,
                     dataHistory: dataHistory,
-                    nomor_meja: nomor_meja,
-                    keterangan: keterangan
+                    nomor_meja: nomor_meja
                 })
             } else {
                 res.status(400).json({
@@ -85,32 +85,49 @@ controllers.allDataHistory = allDataHistory
 
 const cancelReservation = async (req, res) => {
     const id_reservasi = req.params.id_reservasi
+    const id_user = req.session.id_user
 
-    const id_user = 3
     const findUser = await User.findByPk(id_user)
-    if (findUser) {
 
+    if (findUser) {
         const findReservasi = await Reservasi.findByPk(id_reservasi)
+        const statusReservasi = findReservasi.status
+
         if (findReservasi) {
             const reservationTime = findReservasi.jam_mulai
+            const reservationDate = findReservasi.tanggal_reservasi; 
             const [hour, minute, second] = reservationTime.split(':');
             const formattedReservationTime = `${hour}:${minute}`;
 
             const now = moment().tz('Asia/Jakarta');
+            const currentDate = now.format('YYYY-MM-DD');
             const jamNow = now.format('HH:mm');
 
             const timeAfterSubtraction = moment(formattedReservationTime, 'HH:mm').subtract(30, 'minutes').format('HH:mm');
-
+            const currentDateFormatted = moment(currentDate).format('YYYY-MM-DD');
+            
             const isTime1GreaterThanTime2 = moment(jamNow, 'HH:mm').isAfter(moment(timeAfterSubtraction, 'HH:mm'));
-
-            if (isTime1GreaterThanTime2) {
+            const isCurrentDateAfterReservationDate = moment(currentDateFormatted).isAfter(moment(reservationDate));
+            
+            if (isTime1GreaterThanTime2 && isCurrentDateAfterReservationDate) {
                 res.status(400).json({
                     success: false,
                     message: 'Reservation fails to be cancelled, cancellation must be 30 minutes before reservation time'
                 })
+            }else if (findReservasi && statusReservasi == 'Completed') {
+                res.status(400).json({
+                    success: false,
+                    message: 'Fail, reservation has been completed'
+                })
+            } else if (findReservasi && statusReservasi == 'Canceled') {
+                res.status(400).json({
+                    success: false,
+                    message: 'Fail, the reservation has been canceled'
+            })
             } else {
                 const updateReservation = await Reservasi.update({
                     status: 'Canceled',
+                    keterangan: 'The Reservation has been cancelled',
                     jam_mulai: '',
                     jam_selesai: ''
                 }, {
