@@ -180,18 +180,19 @@
                         }
                         numberTable.innerHTML = " Table " + dataReservation.nomor_meja
                         amountPeople.innerHTML = dataReservation.jumlah_orang + "  People"
-                        //btn status
-                        const statusBedge = document.createElement("span")
+                         //btn status
+                         const statusBedge = document.createElement("span")
                         statusBedge.classList.add("badge", "p-2")
                         statusBedge.textContent = dataReservation.status
                         status.appendChild(statusBedge);
                         if (dataReservation.status.toLowerCase() === 'canceled') {
                             statusBedge.classList.add("bg-maroon", "text-white");
                             statusBedge.style.backgroundColor = "maroon"
+                        } else if (dataReservation.status.toLowerCase() === 'completed') {
+                            statusBedge.classList.add("bg-success", "text-white");
                         } else {
                             statusBedge.classList.add("bg-blue", "text-white");
                         }
-
                         i++;
 
                         const buttonContainer = document.createElement("div");
