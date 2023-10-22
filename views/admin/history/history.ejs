@@ -27,10 +27,10 @@
                 </div>
             </div>
             <li>
-                <P class="fw-light fs-5  pe-5 ps-5">Hello,<span class="fw-bold"> Admin!</span></P>
+                <P class="fw-light fs-5  pe-5 ps-5">Hello, <span class="fw-bold" id="nameuser"></span> ! </P>
             </li>
-            <li class="p-3 ps-4">
-                <a class="text-white" href=" #">
+            <li class="p-3 ps-4 available">
+                <a class="text-white" href=" /manageTable">
                     <div class="">
                         <div class="row">
                             <div class="col-3">
@@ -44,7 +44,7 @@
                 </a>
             </li>
             <li class="p-3 ps-4 history">
-                <a class="pb-2 text-white" href=" #">
+                <a class="pb-2 text-white" href="/reservationAdmin">
                     <div class="">
                         <div class="row">
                             <div class="col-3">
@@ -58,7 +58,7 @@
                 </a>
             </li>
             <li class="p-3 ps-4">
-                <a class="pb-2 text-white " href=" #">
+                <a class="pb-2 text-white " href="/profile">
                     <div class="">
                         <div class="row">
                             <div class="col-3">
@@ -72,7 +72,7 @@
                 </a>
             </li>
             <li class="p-3 ps-4">
-                <a class="pb-2 text-white" href=" #">
+                <a class="pb-2 text-white" href="/logout" id="btn-logout">
                     <div class="">
                         <div class="row">
                             <div class="col-3">
@@ -103,91 +103,8 @@
                         <td scope="col">Action</td>
                     </tr>
                 </thead>
-                <tbody>
-                    <tr>
-                        <td scope="row" class="p-4">1</td>
-                        <td scope="row" class="p-4">Nadini Annisa Byant</td>
-                        <td class="p-4">22-9-2023</td>
-                        <td class="p-4">16:00 - 16:30</td>
-                        <td class="p-4">4</td>
-                        <td class="p-4">2</td>
-                        <td class="p-4"><span class="badge p-2">Reserved</span></td>
-                        <td class="p-4">
-                            <div class="">
-                                <div class="row w-100">
-                                    <div class="col-4">
-                                        <button type="button" class="btn btn-warning btn-sm pe-4 ps-4">
-                                            <div class="">
-                                                <div class="row text-center text-white">
-                                                    Edit
-                                                </div>
-                                            </div>
-                                        </button>
-                                    </div>
-                                    <div class="col-4">
-                                        <button type="button" class="btn btn-success btn-sm pe-4 ps-4">
-                                            <div class="">
-                                                <div class="row">
-                                                    Done
-                                                </div>
-                                            </div>
-                                        </button>
-                                    </div>
-                                    <div class="col-4">
-                                        <button type="button" class="btn btn-danger btn-sm pe-4 ps-4">
-                                            <div class="">
-                                                <div class="row">
-                                                    Reject
-                                                </div>
-                                            </div>
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td scope="row" class="p-4">1</td>
-                        <td scope="row" class="p-4">Nadini Annisa Byant</td>
-                        <td class="p-4">22-9-2023</td>
-                        <td class="p-4">16:00 - 16:30</td>
-                        <td class="p-4">4</td>
-                        <td class="p-4">2</td>
-                        <td class="p-4"><span class="badge p-2">Reserved</span></td>
-                        <td class="p-4">
-                            <div class="">
-                                <div class="row w-100">
-                                    <div class="col-4">
-                                        <button type="button" class="btn btn-warning btn-sm pe-4 ps-4">
-                                            <div class="">
-                                                <div class="row text-center text-white">
-                                                    Edit
-                                                </div>
-                                            </div>
-                                        </button>
-                                    </div>
-                                    <div class="col-4">
-                                        <button type="button" class="btn btn-success btn-sm pe-4 ps-4">
-                                            <div class="">
-                                                <div class="row">
-                                                    Done
-                                                </div>
-                                            </div>
-                                        </button>
-                                    </div>
-                                    <div class="col-4">
-                                        <button type="button" class="btn btn-danger btn-sm pe-4 ps-4">
-                                            <div class="">
-                                                <div class="row">
-                                                    Reject
-                                                </div>
-                                            </div>
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </td>
-                    </tr>
+                <tbody class="text-center " id="formTableBody">
+                    <!-- tr data reservation -->
                 </tbody>
             </table>
         </div>
@@ -196,6 +113,197 @@
         integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm" crossorigin="anonymous">
     </script>
 
+    <script>
+        document.addEventListener("DOMContentLoaded", async function () {
+            //Menampilkan username yg sedang login
+           const response = await fetch('/getNama', {
+                method: 'GET'
+            });
+            const data = await response.json();
+
+            if (data.success) {
+                const username = data.username;
+                const usernameProfile = document.getElementById('nameuser');
+                usernameProfile.textContent = `${username}`;
+            } else {
+                window.location.href = '/login';
+            }
+            
+            //Menampilkan data reservasi
+            const tbody = document.getElementById("formTableBody");
+            try{
+                const response = await fetch('/reservation-history')
+                const data = await response.json();
+
+                if(data.success == true){
+                    const dataReservations = data.data;
+                    console.log(dataReservations)
+                    var i = 1;
+                    
+                    dataReservations.forEach((dataReservation) => {
+                        const tr = document.createElement("tr");
+                        tbody.appendChild(tr);
+
+                        const no = document.createElement("td")
+                        const fullName = document.createElement('td')
+                        const reservationDate = document.createElement('td')
+                        const reservationTime = document.createElement("td")
+                        const numberTable = document.createElement("td")
+                        const amountPeople = document.createElement("td")
+                        const status = document.createElement("td")
+                        const action = document.createElement("td")
+
+                        tbody.appendChild(tr)
+                        tr.appendChild(no)
+                        tr.appendChild(fullName)
+                        tr.appendChild(reservationDate)
+                        tr.appendChild(reservationTime)
+                        tr.appendChild(numberTable)
+                        tr.appendChild(amountPeople)
+                        tr.appendChild(status)
+                        tr.appendChild(action)
+
+                        no.setAttribute('scope', 'row')
+
+                        no.innerHTML = i;
+                        fullName.innerHTML = dataReservation.full_name
+                        if( dataReservation.tanggal_reservasi === "0000-00-00") {
+                            reservationDate.innerHTML = " - " 
+                        } else {
+                            reservationDate.innerHTML = dataReservation.tanggal_reservasi
+                        }
+                        
+                        if (dataReservation.jam_mulai === "00:00:00" && dataReservation.jam_selesai === "00:00:00"){
+                            reservationTime.innerHTML = " - " 
+                        } else{
+                            reservationTime.innerHTML = dataReservation.jam_mulai + " - " + dataReservation.jam_selesai
+                        }
+                        numberTable.innerHTML = " Table " + dataReservation.nomor_meja
+                        amountPeople.innerHTML = dataReservation.jumlah_orang + "  People"
+                        //btn status
+                        const statusBedge = document.createElement("span")
+                        statusBedge.classList.add("badge", "p-2")
+                        statusBedge.textContent = dataReservation.status
+                        status.appendChild(statusBedge);
+                        if (dataReservation.status.toLowerCase() === 'canceled') {
+                            statusBedge.classList.add("bg-maroon", "text-white");
+                            statusBedge.style.backgroundColor = "maroon"
+                        } else {
+                            statusBedge.classList.add("bg-blue", "text-white");
+                        }
+
+                        i++;
+
+                        const buttonContainer = document.createElement("div");
+                        buttonContainer.classList.add("row", "w-100", "d-flex", "justify-content-center");
+
+                        const editBtn = document.createElement("a")
+                        editBtn.classList.add("col-3");
+                        const doneBtn = document.createElement("a")
+                        doneBtn.classList.add("col-3");
+                        const rejectBtn = document.createElement("a")
+                        rejectBtn.classList.add("col-3");
+
+                        editBtn.classList.add("btn", "btn-warning", "btn-sm", "pe-4", "ps-4");
+                        editBtn.innerHTML = "Edit";
+                        editBtn.style.marginRight = "8px";
+                        buttonContainer.appendChild(editBtn)
+                        editBtn.addEventListener('click', function() {
+                            window.location.href = '/editReservationView/' + dataReservation.id_reservasi;
+                        });
+
+                        doneBtn.setAttribute('data-id', dataReservation.id_reservasi);
+                        doneBtn.classList.add("btn", "btn-success", "doneBtn", "btn-sm", "pe-4", "ps-4");
+                        doneBtn.innerHTML = "Done";
+                        doneBtn.style.marginRight = "8px";
+                        buttonContainer.appendChild(doneBtn);
+
+                        rejectBtn.setAttribute('data-id', dataReservation.id_reservasi);
+                        rejectBtn.classList.add("btn", "btn-danger", "rejectBtn", "btn-sm", "pe-4", "ps-4");
+                        rejectBtn.innerHTML = "Reject ";
+                        rejectBtn.style.marginRight = "8px";
+                        buttonContainer.appendChild(rejectBtn);
+
+                        action.appendChild(buttonContainer);
+                    });
+                }
+            } catch (error) {
+            console.log(error);
+            }
+
+            //Action done reservation
+            const btnDone = document.getElementsByClassName("doneBtn")
+            console.log(btnDone);
+
+            for (let i = 0; i < btnDone.length; i++) {
+                btnDone[i].addEventListener('click', async function () {
+                    const id_reservasi = btnDone[i].getAttribute('data-id')
+                    console.log(id_reservasi)
+
+                    const response = await fetch(`/done/${id_reservasi}`, {
+                        method: 'GET'
+                    }); 
+                    const data = await response.json();
+
+                    if (data.success == true) {
+                        alert(data.message)
+                        location.reload()
+                    } else if (data.success == false) {
+                        alert(data.message)
+                    }
+                })
+            }
+
+            //Action reject reservation
+            const btnReject = document.getElementsByClassName("rejectBtn")
+            console.log(btnReject);
+
+            for (let i = 0; i < btnReject.length; i++) {
+                btnReject[i].addEventListener('click', async function () {
+                    const id_reservasi = btnReject[i].getAttribute('data-id')
+                    console.log(id_reservasi)
+
+                    const response = await fetch(`/reject/${id_reservasi}`, {
+                        method: 'GET'
+                    }); 
+                    const data = await response.json();
+
+                    if (data.success == true) {
+                        alert(data.message)
+                        location.reload()
+                    } else if (data.success == false) {
+                        alert(data.message)
+                    }
+                })
+            }
+
+            //Logout
+            const btnLogout = document.getElementById('btn-logout');
+            btnLogout.addEventListener('click', async function (event) {
+                event.preventDefault();
+                const confirmLogout = confirm("Are you sure want to logout from this web?");
+
+                if(confirmLogout) {
+                    try {
+                        const response = await fetch('/logout', {
+                            method: 'POST'
+                        });
+                        const data = await response.json();
+
+                        if (data.success) {
+                            window.location.href = '/login';
+                        } else {
+                            console.log(data.message);
+                            location.reload();
+                        }
+                    } catch (error) {
+                        console.log(error);
+                    }
+                }
+            });
+
+        });
+    </script>
 </body>
 
 </html>

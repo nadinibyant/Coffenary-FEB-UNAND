@@ -50,7 +50,7 @@ controllers.getDataProfile = getDataProfile
 
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
-        cb(null, path.join(__dirname, '../', '../', 'public', 'img', 'profile'));
+        cb(null, path.join(__dirname, '../', 'public', 'img', 'profile'));
     },
     filename: function (req, file, cb) {
         cb(null, file.originalname);

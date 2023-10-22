@@ -24,12 +24,27 @@ const verifyToken = (req, res, next) => {
 };
 
 const tableUserView = async (req, res) => {
-    res.render('users/table/table')
+    try {
+        const findUser = await User.findOne({
+            id_user: req.session.id_user
+        })
+
+        if (!findUser) {
+            return res.redirect('/login')
+        }
+        const user = findUser.username;
+        res.render('users/table/table', {
+            user
+        })
+    } catch (error) {
+        return res.redirect('/login')
+    }
 }
 controllers.tableUserView = [verifyToken, tableUserView]
 
 const allTableData = async (req, res) => {
     const findAllTable = await Meja.findAll()
+
     if (findAllTable.length > 0) {
         const data = findAllTable.map((table) => ({
             id_meja: table.id_meja,
@@ -39,8 +54,7 @@ const allTableData = async (req, res) => {
         }))
 
         res.status(200).json({
-            success: false,
-            message: 'Table data found',
+            success: true,
             data: data
         })
     } else {
@@ -56,6 +70,29 @@ const reservationView = async (req, res) => {
     res.render('users/table/reservation')
 }
 controllers.reservationView = reservationView
+
+const getTableReservation = async (req, res) => {
+   const id_meja = req.params.id_meja
+
+    const findTable = await Meja.findOne({
+        where: {
+            id_meja: id_meja
+        }
+    })
+
+    if (findTable) {
+        res.status(200).json({
+            success: true,
+            data: findTable
+        })
+    } else {
+        res.status(400).json({
+            success: false,
+            message: 'Table data not found'
+        })
+    }
+}
+controllers.getTableReservation = getTableReservation
 
 const getJam = async (req, res) => {
     const id_meja = req.params.id_meja
@@ -135,6 +172,11 @@ const addReservation = async (req, res) => {
                 res.status(400).json({
                     success: false,
                     message: 'The number of people exceeds the table capacity'
+                })
+            } else if(jumlah_orang <= 0){
+                res.status(400).json({
+                    success: false,
+                    message: 'The number of people should not be less than 0'
                 })
             } else {
                 const addDataReservasi = await Reservasi.create({

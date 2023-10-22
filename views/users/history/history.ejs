@@ -27,10 +27,10 @@
                 </div>
             </div>
             <li>
-                <P class="fw-light fs-5  pe-5 ps-5">Hello,<span class="fw-bold"> Nadini</span></P>
+                <P class="fw-light fs-5  pe-5 ps-5">Hello, <span class="fw-bold" id="username"></span> ! </P>
             </li>
-            <li class="p-3 ps-5 ">
-                <a class="pb-2 text-white" href=" #">
+            <li class="p-3 ps-5 available">
+                <a class="pb-2 text-white" href="/table">
                     <div class="">
                         <div class="row">
                             <div class="col-3">
@@ -43,8 +43,8 @@
                     </div>
                 </a>
             </li>
-            <li class="p-3 ps-5 history">
-                <a class="pb-2 text-white" href=" #">
+            <li class="p-3 ps-5">
+                <a class="pb-2 text-white" href="/historyUser">
                     <div class="">
                         <div class="row">
                             <div class="col-3">
@@ -58,7 +58,7 @@
                 </a>
             </li>
             <li class="p-3 ps-5">
-                <a class="pb-2 text-white" href=" #">
+                <a class="pb-2 text-white" href="/profileView">
                     <div class="">
                         <div class="row">
                             <div class="col-3">
@@ -72,7 +72,7 @@
                 </a>
             </li>
             <li class="p-3 ps-5">
-                <a class="pb-2 text-white" href=" #">
+                <a class="pb-2 text-white" href="/logout" id="btn-logout">
                     <div class="">
                         <div class="row">
                             <div class="col-3">
@@ -88,7 +88,7 @@
         </div>
     </div>
     <div class="p-4" id="main-content">
-        <div class="w-100 mt-5">
+        <div class="container me-3 mt-5">
             <p class="fw-bold pb-4 ">History dan Pemesanan</p>
             <table class="table me-5 text-center table-striped">
                 <thead class="text-white">
@@ -99,36 +99,13 @@
                         <td scope="col">Number of Table</td>
                         <td scope="col">Number of People</td>
                         <td scope="col">Status</td>
-                        <td scope="col">Information</td>
+                        <td scope="col">Description</td>
                         <td scope="col">Action</td>
                     </tr>
                 </thead>
-                <tbody">
-                    <tr>
-                        <td scope="row" class="p-4">1</td>
-                        <td class="p-4">22-9-2023</td>
-                        <td class="p-4">16:00 - 16:30</td>
-                        <td class="p-4">1</td>
-                        <td class="p-4">4</td>
-                        <td class="p-4"><span class="badge p-2">On Progress</span></td>
-                        <td class="p-4">Your reservation table has been moved to number 2</td>
-                        <td class="p-4"><button type="button" class="btn btn-danger btn-sm">
-                                <div class="container">
-                                    <div class="row">
-                                        <div class="col-1 ms-0">
-
-                                            <iconify-icon icon="iconoir:cancel"></iconify-icon>
-
-                                        </div>
-                                        <div class="col-3 me-4">
-                                            Cancel
-                                        </div>
-                                    </div>
-                                </div>
-
-                            </button></td>
-                    </tr>
-                    </tbody>
+                <tbody id="formTableBody">
+                    <!-- tr data reservation -->
+                </tbody>
             </table>
         </div>
 
@@ -137,6 +114,150 @@
         integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm" crossorigin="anonymous">
     </script>
 
+    <script>
+        document.addEventListener("DOMContentLoaded", async function () {
+            //Menampilkan username yg sedang login
+            const response = await fetch('/getNama', {
+                method: 'GET'
+            });
+            const data = await response.json();
+
+            if (data.success) {
+                const username = data.username;
+                const usernameProfile = document.getElementById('username');
+                usernameProfile.textContent = `${username}`;
+            } else {
+                window.location.href = '/login';
+            }
+
+            //Menampilkan data reservasi
+            const tbody = document.getElementById("formTableBody");
+            try{
+                const response = await fetch('/allDataHistory')
+                const data = await response.json();
+
+                if(data.success == true){
+                    const userReservations = data.dataHistory;
+                    const tableNumbers = data.nomor_meja;
+                    console.log(userReservations);
+                    console.log(tableNumbers);
+                    var i = 1;
+                    
+                    userReservations.forEach((reservation, index) => {
+                        const tr = document.createElement("tr");
+                        tbody.appendChild(tr);
+
+                        const no = document.createElement("td")
+                        const reservationDate = document.createElement('td')
+                        const reservationTime = document.createElement('td')
+                        const numberTable = document.createElement("td")
+                        const amountPeople = document.createElement("td")
+                        const status = document.createElement("td")
+                        const keterangan = document.createElement("td")
+                        const action = document.createElement("td")
+
+                        tbody.appendChild(tr)
+                        tr.appendChild(no)
+                        tr.appendChild(reservationDate)
+                        tr.appendChild(reservationTime)
+                        tr.appendChild(numberTable)
+                        tr.appendChild(amountPeople)
+                        tr.appendChild(status)
+                        tr.appendChild(keterangan)
+                        tr.appendChild(action)
+
+                        no.setAttribute('scope', 'row')
+                        no.innerHTML = i;
+                        reservationDate.innerHTML = reservation.tanggal_reservasi
+                        if (reservation.jam_mulai === "00:00:00" && reservation.jam_selesai === "00:00:00"){
+                            reservationTime.innerHTML = " - " 
+                        } else{
+                            reservationTime.innerHTML = reservation.jam_mulai + " - " + reservation.jam_selesai
+                        }
+                        numberTable.innerHTML = " Table " + tableNumbers[index]
+                        amountPeople.innerHTML = reservation.jumlah_orang + "  People"
+                        keterangan.innerHTML = reservation.keterangan
+                        //btn status
+                        const statusBedge = document.createElement("span")
+                        statusBedge.classList.add("badge", "p-2")
+                        statusBedge.classList.add("bg-blue", "text-white");
+                        statusBedge.textContent = reservation.status
+                        status.appendChild(statusBedge);
+                        i++;
+
+                        const cancelButton= document.createElement("button")
+                        const cancelIcon = document.createElement("iconify-icon");
+
+                        action.appendChild(cancelButton)
+                        cancelButton.setAttribute('data-id', reservation.id_reservasi);
+                        cancelButton.classList.add("btn", "btn-danger", "btnCancel");
+                        cancelButton.innerHTML = '<iconify-icon icon="iconoir:cancel"></iconify-icon> Cancel' ;
+                        cancelIcon.style.color = "white";
+                        cancelButton.appendChild(cancelIcon);
+                    });
+                } else {
+                    alert(data.message);
+                }
+            } catch (error) {
+                console.log(error);
+            }
+
+            //Membatalkan Reservasi
+            const cancelButtons = document.querySelectorAll('.btnCancel');
+
+            cancelButtons.forEach((cancelButton) => {
+                cancelButton.addEventListener('click', async (event) => {
+                    const id_reservasi  = event.target.getAttribute('data-id');
+                    const confirmation = confirm('Are you sure to cancaled this reservation?');
+                    
+                    if(confirmation) {
+                        try{
+                            const response = await fetch(`/cancelReservation/${id_reservasi}`, {
+                                method: 'GET'
+                            }); 
+                            const data = await response.json();
+
+                            if (data.success == true) {
+                                alert(data.message)
+                                location.reload()
+                            } else if (data.success == false) {
+                                alert(data.message)
+                            }
+                        } catch (error) {
+                            console.error(error);
+                            alert('An error occurred while deleting the table.');
+                        }
+                    }
+                })
+            })
+
+            //Logout
+            const btnLogout = document.getElementById('btn-logout');
+            btnLogout.addEventListener('click', async function (event) {
+                event.preventDefault();
+                const confirmLogout = confirm("Are you sure want to logout from this web?");
+
+                if(confirmLogout) {
+                    try {
+                        const response = await fetch('/logout', {
+                            method: 'POST'
+                        });
+                        const data = await response.json();
+
+                        if (data.success) {
+                            window.location.href = '/login';
+                        } else {
+                            console.log(data.message);
+                            location.reload();
+                        }
+                    } catch (error) {
+                        console.log(error);
+                    }
+                }
+            });
+
+        })
+    </script>
 </body>
 
 </html>

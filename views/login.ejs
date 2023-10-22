@@ -28,7 +28,7 @@
                     <form>
                         <div class="mb-3">
                             <label for="username" class="form-label fw-bold">Username</label>
-                            <input type="text" class="form-control" id="username" aria-describedby="emailHelp">
+                            <input type="text" class="form-control" id="username" aria-describedby="usernameHelp">
                         </div>
                         <div class="mb-3">
                             <label for="password" class="form-label fw-bold">Password</label>
@@ -45,6 +45,37 @@
     </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4" crossorigin="anonymous">
+    </script>
+
+    <script>
+        const form = document.querySelector('form');
+            form.addEventListener('submit', async (event) => {
+            event.preventDefault();
+        
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+        
+            const formData = new FormData(form);
+            const response = await fetch('/login', {
+                method: 'POST',
+                headers: {
+                "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ username, password })
+            });
+        
+            const data = await response.json();
+        
+            if (data.success == true && data.role == 'user'){
+                alert (data.message)
+                window.location.href = '/table';
+            } else if (data.success == true && data.role == 'admin') {
+                alert (data.message)
+                window.location.href = '/manageTable';
+            } else{
+                alert (data.message)
+            }
+        });
     </script>
 </body>
 
