@@ -186,7 +186,7 @@
 
                 if (data.success) {
                     const dataTable = data.data;
-                    
+                    fotoMeja.src = `/img/meja/${dataTable.foto_meja}`;
                     numberTable.innerHTML  = "Meja " + dataTable.nomor_meja;
                     numberSeats.textContent  = dataTable.jumlah_kursi + " Seats";
                 } else {
