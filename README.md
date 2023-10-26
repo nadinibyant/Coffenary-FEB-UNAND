@@ -1,4 +1,5 @@
 # Coffenary-FEB-UNAND
+Aplikasi coffenary adalah aplikasi reservasi tempat secara online pada cafe coffenary
 
 # Instalasi
 

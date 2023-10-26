@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Table</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700&family=Poppins:wght@300;500;600;700&family=Princess+Sofia&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="/css/available.css">
+    <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+</head>
+
+<body>
+    <div>
+        <div class="sidebar pt-3 text-white" id="sidebar">
+            <div class=" pe-5 ps-5">
+                <div class="row">
+                    <div class=" p-0">
+                        <img src="/img/logo.png" class="img-fluid" alt="...">
+                    </div>
+                </div>
+            </div>
+            <li>
+                <P class="fw-light fs-5  pe-5 ps-5">Hello, <span class="fw-bold" id="username"></span> ! </P>
+            </li>
+            <li class="p-3 ps-5 available">
+                <a class="pb-2 text-white" href="/table">
+                    <div class="">
+                        <div class="row">
+                            <div class="col-3">
+                                <iconify-icon icon="mdi:desk" width="30"></iconify-icon>
+                            </div>
+                            <div class="col-9 ps-0 pt-1 text-start">
+                                Table
+                            </div>
+                        </div>
+                    </div>
+                </a>
+            </li>
+            <li class="p-3 ps-5">
+                <a class="pb-2 text-white" href="/historyUser">
+                    <div class="">
+                        <div class="row">
+                            <div class="col-3">
+                                <iconify-icon icon="iconamoon:history-bold" width="30"></iconify-icon>
+                            </div>
+                            <div class="col-9 ps-0 pt-1 text-start">
+                                Reservation History
+                            </div>
+                        </div>
+                    </div>
+                </a>
+            </li>
+            <li class="p-3 ps-5">
+                <a class="pb-2 text-white" href="/profileView">
+                    <div class="">
+                        <div class="row">
+                            <div class="col-3">
+                                <iconify-icon icon="iconamoon:profile-fill" width="30"></iconify-icon>
+                            </div>
+                            <div class="col-9 ps-0 pt-1 text-start">
+                                Profile
+                            </div>
+                        </div>
+                    </div>
+                </a>
+            </li>
+            <li class="p-3 ps-5">
+                <a class="pb-2 text-white" href="/logout" id="btn-logout">
+                    <div class="">
+                        <div class="row">
+                            <div class="col-3">
+                                <iconify-icon icon="majesticons:logout" width="30"></iconify-icon>
+                            </div>
+                            <div class="col-9 ps-0 pt-1 text-start">
+                                logout
+                            </div>
+                        </div>
+                    </div>
+                </a>
+            </li>
+        </div>
+    </div>
+    <div class="p-4" id="main-content">
+        <p class="fw-bold">Choosen Table</p>
+        <p class="fw-light">Reservatios can be cancelled if there are priority guests and can be seen in the description</p>
+        <div class="container mt-4">
+            <div class="row" id="tableContainer">
+                <!-- data table -->
+            </div> 
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm" crossorigin="anonymous">
+    </script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", async function () {
+            //Menampilkan username yg sedang login
+            const response = await fetch('/getNama', {
+                method: 'GET'
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                const username = data.username;
+                const usernameProfile = document.getElementById('username');
+                usernameProfile.textContent = `${username}`;
+            } else {
+                window.location.href = '/login';
+            }
+
+            //Menampilkan data meja
+            const tableContainer = document.getElementById("tableContainer");
+            try {
+                const response = await fetch('/allTable');
+                const data = await response.json();
+
+                if (data.success) {
+                    const tables = data.data;
+
+                    tables.forEach((table) => {
+                        const card = document.createElement("div");
+                        card.classList.add("col", "mb-4");
+
+                        const cardInner = document.createElement("div");
+                        cardInner.classList.add("card");
+                        cardInner.style.width = "18rem";
+
+                        //img foto meja
+                        const image = document.createElement("img");
+                        image.src = `/img/meja/${table.foto_meja}`;
+                        image.classList.add("card-img-top", "p-4", "pb-0");
+                        image.alt = "Table Image";
+
+                        const cardBody = document.createElement("div");
+                        cardBody.classList.add("card-body", "p-4");
+
+                        const row = document.createElement("div");
+                        row.classList.add("row");
+
+                        //nomor meja
+                        const colLeft = document.createElement("div");
+                        colLeft.classList.add("col", "fw-bold", "pb-2");
+                        colLeft.textContent = `Meja ${table.nomor_meja}`;
+                        
+                        //jumlah kursi
+                        const seatInfo = document.createElement("p");
+                        seatInfo.textContent = `${table.jumlah_kursi} Seats`;
+
+                        const reservationButton = document.createElement("button");
+                        reservationButton.type = "button";
+                        reservationButton.classList.add("btn", "btn-light", "text-white", "w-100", "btn-book");
+                        reservationButton.textContent = "Reservation";
+                        reservationButton.addEventListener('click', function() {
+                        window.location.href = '/reservationTable/' + table.id_meja;
+                        });
+
+                        row.appendChild(colLeft);
+
+                        cardBody.appendChild(row);
+                        cardBody.appendChild(seatInfo);
+                        cardBody.appendChild(reservationButton);
+
+                        cardInner.appendChild(image);
+                        cardInner.appendChild(cardBody);
+
+                        card.appendChild(cardInner);
+                        tableContainer.appendChild(card);
+                    });
+                } else {
+                    console.log(data.message);
+                }
+            } catch (error) {
+                console.log(error);
+            }
+
+            //Logout
+            const btnLogout = document.getElementById('btn-logout');
+            btnLogout.addEventListener('click', async function (event) {
+                event.preventDefault();
+                const confirmLogout = confirm("Are you sure want to logout from this web?");
+
+                if(confirmLogout) {
+                    try {
+                        const response = await fetch('/logout', {
+                            method: 'POST'
+                        });
+                        const data = await response.json();
+
+                        if (data.success) {
+                            window.location.href = '/login';
+                        } else {
+                            console.log(data.message);
+                            location.reload();
+                        }
+                    } catch (error) {
+                        console.log(error);
+                    }
+                }
+            });
+            
+        })
+    </script>
+</body>
+
+</html>
