@@ -180,9 +180,16 @@
                         //btn status
                         const statusBedge = document.createElement("span")
                         statusBedge.classList.add("badge", "p-2")
-                        statusBedge.classList.add("bg-blue", "text-white");
                         statusBedge.textContent = reservation.status
                         status.appendChild(statusBedge);
+                        if (reservation.status.toLowerCase() === 'canceled') {
+                            statusBedge.classList.add("bg-maroon", "text-white");
+                            statusBedge.style.backgroundColor = "maroon"
+                        } else if (reservation.status.toLowerCase() === 'completed') {
+                            statusBedge.classList.add("bg-success", "text-white");
+                        } else {
+                            statusBedge.classList.add("bg-blue", "text-white");
+                        }
                         i++;
 
                         const cancelButton= document.createElement("button")
