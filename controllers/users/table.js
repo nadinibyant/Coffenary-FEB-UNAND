@@ -75,7 +75,7 @@ controllers.allTableData = allTableData
 const reservationView = async (req, res) => {
     res.render('users/table/reservation')
 }
-controllers.reservationView = reservationView
+controllers.reservationView = [verifyToken,reservationView]
 
 const getTableReservation = async (req, res) => {
    const id_meja = req.params.id_meja
