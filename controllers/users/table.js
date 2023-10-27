@@ -17,7 +17,13 @@ const verifyToken = (req, res, next) => {
     try {
         const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
         req.user = decoded.id_user;
-        next();
+        const role = decoded.role;
+        if (role == 1) {
+            next();
+        } else {
+            return res.redirect('/login');
+        }
+        
     } catch (error) {
         return res.redirect('/login');
     }
