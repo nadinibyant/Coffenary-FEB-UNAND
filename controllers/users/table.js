@@ -17,7 +17,13 @@ const verifyToken = (req, res, next) => {
     try {
         const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
         req.user = decoded.id_user;
-        next();
+        const role = decoded.role;
+        if (role == 1) {
+            next();
+        } else {
+            return res.redirect('/login');
+        }
+        
     } catch (error) {
         return res.redirect('/login');
     }
@@ -69,7 +75,7 @@ controllers.allTableData = allTableData
 const reservationView = async (req, res) => {
     res.render('users/table/reservation')
 }
-controllers.reservationView = reservationView
+controllers.reservationView = [verifyToken,reservationView]
 
 const getTableReservation = async (req, res) => {
    const id_meja = req.params.id_meja
@@ -144,6 +150,10 @@ const addReservation = async (req, res) => {
     const jumlah_orang = req.body.jumlah_orang
 
     const tanggal = req.body.tanggal_reservasi
+
+    const tanggalSekarang = new Date();
+    tanggalSekarang.setHours(0, 0, 0, 0);
+
     const tanggal_reservasi = new Date(`${tanggal}T00:00:00Z`);
 
     const jam_mulai = req.body.jam_mulai
@@ -153,10 +163,25 @@ const addReservation = async (req, res) => {
             success: false,
             message: 'Complete The Empty Data Input'
         })
+    } else if (tanggal_reservasi < tanggalSekarang) {
+        res.status(400).json({
+            success: false,
+            message: 'Reservation date should not be earlier than today',
+        });
     } else {
         const jamObj = new Date(`2000-01-01T${jam_mulai}`);
         jamObj.setMinutes(jamObj.getMinutes() + 30);
         const jam_selesai = jamObj.toTimeString().slice(0, 8);
+
+        const jamReservasi = new Date(`2000-01-01T${jam_mulai}`);
+        const jamSekarang = new Date();
+
+        if (jamReservasi <= jamSekarang) {
+            res.status(400).json({
+                success: false,
+                message: 'Reservation time should not be earlier than current time',
+            });
+        }
 
         const id_user = req.session.id_user
 
