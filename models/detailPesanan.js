@@ -31,6 +31,10 @@ const DetailPesanan = sequelize.define('detail_pemesanan', {
         type: DataTypes.INTEGER(3),
         allowNull: false
     },
+    total_harga_menu: {
+        type: DataTypes.INTEGER(5),
+        allowNull: false
+    },
     created_at:{
         type: DataTypes.DATE,
         allowNull: false
@@ -44,6 +48,16 @@ const DetailPesanan = sequelize.define('detail_pemesanan', {
     timestamps: true,
     createdAt: 'created_at',
     updatedAt: 'updated_at'
+})
+
+DetailPesanan.belongsTo(Menu, {
+    foreignKey: 'id_menu',
+    as: 'DataMenu'
+})
+
+DetailPesanan.belongsTo(Pesanan, {
+    foreignKey: 'id_pesanan',
+    as: 'DataPesanan'
 })
 
 module.exports = DetailPesanan

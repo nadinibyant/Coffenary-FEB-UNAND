@@ -1,7 +1,8 @@
 const { Sequelize, DataTypes} = require('sequelize')
 require('dotenv').config()
 const User = require('./user')
-const Reservasi = require('./reservasi')
+const Reservasi = require('./reservasi');
+const DetailPesanan = require('./detailPesanan');
 const sequelize = new Sequelize(`mysql://${process.env.DB_USER}:${process.env.DB_PASSWORD}@${process.env.DB_HOST}/${process.env.DB_NAME}`);
 
 const Pesanan = sequelize.define('pesanan', {
@@ -45,5 +46,11 @@ const Pesanan = sequelize.define('pesanan', {
     createdAt: 'created_at',
     updatedAt: 'updated_at'
 })
+
+Pesanan.belongsTo(User, {
+    foreignKey: 'id_user',
+    as: 'DataUser'
+})
+
 
 module.exports = Pesanan

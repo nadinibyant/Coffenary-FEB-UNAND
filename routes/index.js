@@ -5,6 +5,7 @@ const reservasi = require('./reservation')
 const tableUser = require('./users/table')
 const historyUser = require('./users/history')
 const profileUser = require('./users/profile')
+const pesananUser = require('./users/pesanan')
 const menu = require('./menu')
 
 const server = {}
@@ -16,5 +17,6 @@ server.tableUser = tableUser
 server.historyUser = historyUser
 server.profileUser = profileUser
 server.menu = menu
+server.pesananUser = pesananUser
 
 module.exports = server

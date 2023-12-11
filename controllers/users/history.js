@@ -4,6 +4,9 @@ const {
 const User = require('../../models/user')
 const Meja = require('../../models/meja')
 const Reservasi = require('../../models/reservasi')
+const Pesanan = require('../../models/pesanan')
+const DetailPesanan = require('../../models/detailPesanan')
+const Menu = require('../../models/menu')
 const controllers = {}
 const jwt = require('jsonwebtoken')
 const moment = require('moment-timezone');
@@ -24,7 +27,7 @@ const verifyToken = (req, res, next) => {
         } else {
             return res.redirect('/login');
         }
-        
+
     } catch (error) {
         return res.redirect('/login');
     }
@@ -101,7 +104,7 @@ const cancelReservation = async (req, res) => {
 
         if (findReservasi) {
             const reservationTime = findReservasi.jam_mulai
-            const reservationDate = findReservasi.tanggal_reservasi; 
+            const reservationDate = findReservasi.tanggal_reservasi;
             const [hour, minute, second] = reservationTime.split(':');
             const formattedReservationTime = `${hour}:${minute}`;
 
@@ -111,16 +114,16 @@ const cancelReservation = async (req, res) => {
 
             const timeAfterSubtraction = moment(formattedReservationTime, 'HH:mm').subtract(30, 'minutes').format('HH:mm');
             const currentDateFormatted = moment(currentDate).format('YYYY-MM-DD');
-            
+
             const isTime1GreaterThanTime2 = moment(jamNow, 'HH:mm').isAfter(moment(timeAfterSubtraction, 'HH:mm'));
             const isCurrentDateAfterReservationDate = moment(currentDateFormatted).isAfter(moment(reservationDate));
-            
+
             if (isTime1GreaterThanTime2 && isCurrentDateAfterReservationDate) {
                 res.status(400).json({
                     success: false,
                     message: 'Reservation fails to be cancelled, cancellation must be 30 minutes before reservation time'
                 })
-            }else if (findReservasi && statusReservasi == 'Completed') {
+            } else if (findReservasi && statusReservasi == 'Completed') {
                 res.status(400).json({
                     success: false,
                     message: 'Fail, reservation has been completed'
@@ -129,7 +132,7 @@ const cancelReservation = async (req, res) => {
                 res.status(400).json({
                     success: false,
                     message: 'Fail, the reservation has been canceled'
-            })
+                })
             } else {
                 const updateReservation = await Reservasi.update({
                     status: 'Canceled',
@@ -165,5 +168,93 @@ const cancelReservation = async (req, res) => {
     }
 }
 controllers.cancelReservation = cancelReservation
+
+const getDetailReservasiUser = async (req, res) => {
+    const id_reservasi = req.params.id_reservasi
+    const findReservasi = await Reservasi.findByPk(id_reservasi)
+
+    if (findReservasi) {
+        const id_meja = findReservasi.id_meja
+        const tanggal_reservasi = findReservasi.tanggal_reservasi
+        const jam_mulai = findReservasi.jam_mulai
+        const status = findReservasi.status
+
+        const findMeja = await Meja.findByPk(id_meja)
+        if (findMeja) {
+            const nomor_meja = findMeja.nomor_meja
+
+            const findAllMeja = await Meja.findAll()
+            if (findAllMeja.length > 0) {
+                const dataNomorMeja = findAllMeja.map((Meja) => ({
+                    nomor_meja: Meja.nomor_meja
+                }))
+
+                const dataPesanan = await Pesanan.findOne({
+                    where: {
+                        id_reservasi: id_reservasi
+                    }
+                })
+                if (dataPesanan) {
+                    const id_pesanan = dataPesanan.id_pesanan
+                    const detailPesanan = await DetailPesanan.findAll({
+                        include: {
+                            model: Menu,
+                            attributes: ['Nama_menu', 'harga_menu'],
+                            as: 'DataMenu'
+                        },
+                        where: {
+                            id_pesanan: id_pesanan
+                        }
+                    })
+
+                    if (detailPesanan.length > 0) {
+                        res.status(200).json({
+                            success: true,
+                            dataReservasi: {
+                                nomor_meja: nomor_meja,
+                                tanggal_reservasi: tanggal_reservasi,
+                                jam_mulai: jam_mulai,
+                                status: status
+                            },
+                            dataNomorMeja: dataNomorMeja,
+                            dataPesanan: dataPesanan,
+                            dataDetailPesanan: detailPesanan
+                        })
+                    }
+                } else {
+                    res.status(200).json({
+                        success: true,
+                        dataReservasi: {
+                            nomor_meja: nomor_meja,
+                            tanggal_reservasi: tanggal_reservasi,
+                            jam_mulai: jam_mulai,
+                            status: status
+                        },
+                        dataNomorMeja: dataNomorMeja
+                    })
+                }
+
+
+            } else {
+                res.status(400).json({
+                    success: false,
+                    message: 'Table not Found'
+                })
+            }
+
+        } else {
+            res.status(400).json({
+                success: false,
+                message: 'Table not Found'
+            })
+        }
+    } else {
+        res.status(400).json({
+            success: false,
+            message: 'Reservation Data not Found'
+        })
+    }
+}
+controllers.getDetailReservasiUser =  getDetailReservasiUser
 
 module.exports = controllers

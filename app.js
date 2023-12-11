@@ -34,6 +34,7 @@ app.use('/', server.tableUser)
 app.use('/', server.historyUser)
 app.use('/', server.profileUser)
 app.use('/', server.menu) 
+app.use('/', server.pesananUser)
 
 app.use((err, req, res, next) => {
   if (err instanceof multer.MulterError) {

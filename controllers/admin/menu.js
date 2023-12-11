@@ -6,6 +6,9 @@ const jwt = require('jsonwebtoken')
 const Menu = require('../../models/menu')
 const multer = require('multer')
 const path = require('path')
+const {
+    rmSync
+} = require('fs')
 
 const verifyToken = (req, res, next) => {
     const token = req.cookies.token;
@@ -132,5 +135,148 @@ const tambahMenu = async (req, res) => {
 
 }
 controllers.tambahMenu = [verifyToken, uploadd, tambahMenu]
+
+const editMenu = async (req, res) => {
+    try {
+        const id_menu = req.params.id_menu
+        const findMenu = await Menu.findByPk(id_menu)
+        if (findMenu) {
+            const foto_menu = req.file || findMenu.foto_menu
+            const nama_menu = req.body.nama_menu || findMenu.nama_menu
+            const harga_menu = req.body.harga_menu || findMenu.harga_menu
+            const status = req.body.status || findMenu.status
+
+            if (nama_menu && nama_menu !== findMenu.nama_menu) {
+
+                const findNamaMenu = await Menu.findOne({
+                    where: {
+                        nama_menu: nama_menu
+                    }
+                })
+
+                if (findNamaMenu) {
+                    res.status(400).json({
+                        success: false,
+                        message: 'A menu with that name has already been added'
+                    })
+                } else {
+                    const updateMenu = await Menu.update({
+                        foto_menu: foto_menu.originalname,
+                        nama_menu: nama_menu,
+                        harga_menu: harga_menu,
+                        status: status
+                    }, {
+                        where: {
+                            id_menu: id_menu
+                        }
+                    })
+
+                    if (updateMenu) {
+                        res.status(200).json({
+                            success: true,
+                            message: 'Menu data updated successfully'
+                        })
+                    } else {
+                        res.status(400).json({
+                            success: false,
+                            message: 'Menu data was not updated successfully'
+                        })
+                    }
+                }
+            } else {
+                const updateMenu = await Menu.update({
+                    foto_menu: foto_menu.originalname,
+                    nama_menu: nama_menu,
+                    harga_menu: harga_menu,
+                    status: status
+                }, {
+                    where: {
+                        id_menu: id_menu
+                    }
+                })
+                if (updateMenu) {
+                    res.status(200).json({
+                        success: true,
+                        message: 'Menu data updated successfully'
+                    })
+                } else {
+                    res.status(400).json({
+                        success: false,
+                        message: 'Menu data was not updated successfully'
+                    })
+                }
+
+            }
+        } else {
+            res.status(400).json({
+                success: false,
+                message: 'Menu data not found'
+            })
+        }
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: error
+        })
+    }
+
+}
+controllers.editMenu = [verifyToken, uploadd, editMenu]
+
+const detailMenu = async (req, res) => {
+    try {
+        const id_menu = req.params.id_menu
+        const findMenu = await Menu.findByPk(id_menu)
+        if (findMenu) {
+            res.status(200).json({
+                success: true,
+                message: 'Menu data found',
+                data: findMenu
+            })
+        } else {
+            res.status(400).json({
+                success: false,
+                message: 'Menu data not found'
+            })
+        }
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: error
+        })
+    }
+
+}
+controllers.detailMenu = [verifyToken,detailMenu]
+
+const hapusMenu = async (req, res) => {
+    const id_menu = req.params.id_menu
+    const findMenu = await Menu.findByPk(id_menu)
+    if (findMenu) {
+        const hapus = await Menu.destroy({
+            where: {
+                id_menu: id_menu
+            }
+        })
+
+        if (hapus) {
+            res.status(200).json({
+                success: true,
+                message: 'Menu data has been successfully deleted'
+            })
+        } else {
+            res.status(400).json({
+                success: false,
+                message: 'Menu data was not deleted successfully'
+            })
+        }
+    } else {
+        res.status(400).json({
+            success: false,
+            message: 'Menu data not found'
+        })
+    }
+}
+controllers.hapusMenu =[verifyToken, hapusMenu] 
 
 module.exports = controllers

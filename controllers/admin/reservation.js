@@ -5,14 +5,14 @@ const Reservasi = require('../../models/reservasi')
 const User = require('../../models/user')
 const Meja = require('../../models/meja')
 const controllers = {}
-const multer = require('multer')
-const bcrypt = require('bcrypt')
-const path = require('path')
+const DetailPesanan = require('../../models/detailPesanan')
+const Menu = require('../../models/menu')
 const moment = require('moment-timezone');
 const jwt = require('jsonwebtoken')
 const {
     Op
 } = require('sequelize');
+const Pesanan = require('../../models/pesanan')
 
 const verifyToken = (req, res, next) => {
     const token = req.cookies.token;
@@ -30,7 +30,7 @@ const verifyToken = (req, res, next) => {
         } else {
             return res.redirect('/login');
         }
-        
+
     } catch (error) {
         return res.redirect('/login');
     }
@@ -53,7 +53,7 @@ const reservationHistoryView = async (req, res) => {
         return res.redirect('/login')
     }
 }
-controllers.reservationHistoryView = [verifyToken, reservationHistoryView] 
+controllers.reservationHistoryView = [verifyToken, reservationHistoryView]
 
 const allReservationData = async (req, res) => {
     const allReservation = await Reservasi.findAll()
@@ -66,7 +66,7 @@ const allReservationData = async (req, res) => {
             const findMeja = await Meja.findByPk(dataReservation.id_meja)
             const nomor_meja = findMeja.nomor_meja;
 
-            return{
+            return {
                 id_reservasi: dataReservation.id_reservasi,
                 id_meja: dataReservation.id_meja,
                 nomor_meja: nomor_meja,
@@ -81,7 +81,7 @@ const allReservationData = async (req, res) => {
                 created_at: dataReservation.created_at,
                 updated_at: dataReservation.updated_at
             }
-            
+
         })
         const data = await Promise.all(reservationPromises);
         res.status(200).json({
@@ -95,7 +95,7 @@ const allReservationData = async (req, res) => {
         })
     }
 }
-controllers.allReservationData = allReservationData
+controllers.allReservationData = [verifyToken, allReservationData]
 
 const done = async (req, res) => {
     const id_reservasi = req.params.id_reservasi
@@ -153,7 +153,7 @@ const done = async (req, res) => {
     }
 
 }
-controllers.done = done
+controllers.done =[verifyToken, done] 
 
 const reject = async (req, res) => {
     const id_reservasi = req.params.id_reservasi
@@ -167,7 +167,8 @@ const reject = async (req, res) => {
         const now = moment().tz('Asia/Jakarta');
         const jamNow = now.format('HH:mm');
 
-        const timeAfterSubtraction = moment(formattedReservationTime, 'HH:mm').subtract(30, 'minutes').format('HH:mm');
+        const timeAfterSubtraction = moment(formattedReservationTime, 'HH:mm').subtract(10, 'minutes').format('HH:mm');
+        const timeAfterSubtraction2 = moment(formattedReservationTime, 'HH:mm').subtract(30, 'minutes').format('HH:mm');
 
         const dateReservation = findReservasi.tanggal_reservasi
 
@@ -178,18 +179,78 @@ const reject = async (req, res) => {
         console.log('Tanggal sekarang:', `${year}-${month}-${day}`);
         const date = `${year}-${month}-${day}`
 
-        const isTime1GreaterThanTime2 = moment(jamNow, 'HH:mm').isAfter(moment(timeAfterSubtraction, 'HH:mm'));
+        const isTime1GreaterThanTime = moment(jamNow, 'HH:mm').isAfter(moment(timeAfterSubtraction, 'HH:mm'));
+        const isTime1GreaterThanTime2 = moment(jamNow, 'HH:mm').isAfter(moment(timeAfterSubtraction2, 'HH:mm'));
 
         const isSameDate = dateReservation === date;
-
+        console.log(timeAfterSubtraction)
+        console.log(timeAfterSubtraction2)
         if (findReservasi.status == 'Reserved') {
-            if (isSameDate) {
+            if (isSameDate || date < dateReservation) {
                 if (isTime1GreaterThanTime2) {
-                    res.status(400).json({
-                        success: false,
-                        message: 'Reservation fails to be cancelled, cancellation must be 30 minutes before reservation time'
-                    })
+                    if (isTime1GreaterThanTime) {
+                        const keterangan = req.body.keterangan
+                        if (!keterangan) {
+                            res.status(400).json({
+                                success: false,
+                                message: 'Please fill in information about who is coming'
+                            })
+                        } else {
+                            if (keterangan == 'Prioritas' || keterangan == 'prioritas') {
+                                const rejectReservasi = await Reservasi.update({
+                                    status: 'Canceled',
+                                    jam_mulai: '',
+                                    jam_selesai: '',
+                                    keterangan: 'Reservation was canceled due to priority guests from coffeenary'
+                                }, {
+                                    where: {
+                                        id_reservasi: id_reservasi
+                                    }
+                                })
 
+                                if (rejectReservasi) {
+                                    res.status(200).json({
+                                        success: true,
+                                        message: 'Reservation was successfully cancelled'
+                                    })
+                                } else {
+                                    res.status(400).json({
+                                        success: false,
+                                        message: 'Reservation was usuccessfully cancelled'
+                                    })
+                                }
+                            } else {
+                                res.status(400).json({
+                                    success: false,
+                                    message: 'Reservation fails to be cancelled, cancellation must be 30 minutes before reservation time'
+                                })
+                            }
+                        }
+
+                    } else {
+                        const rejectReservasi = await Reservasi.update({
+                            status: 'Canceled',
+                            jam_mulai: '',
+                            jam_selesai: '',
+                            keterangan: 'Reservation was canceled due to priority guests from coffeenary'
+                        }, {
+                            where: {
+                                id_reservasi: id_reservasi
+                            }
+                        })
+
+                        if (rejectReservasi) {
+                            res.status(200).json({
+                                success: true,
+                                message: 'Reservation was successfully cancelled'
+                            })
+                        } else {
+                            res.status(400).json({
+                                success: false,
+                                message: 'Reservation was usuccessfully cancelled'
+                            })
+                        }
+                    }
                 } else {
                     const rejectReservasi = await Reservasi.update({
                         status: 'Canceled',
@@ -215,28 +276,10 @@ const reject = async (req, res) => {
                     }
                 }
             } else {
-                const rejectReservasi = await Reservasi.update({
-                    status: 'Canceled',
-                    jam_mulai: '',
-                    jam_selesai: '',
-                    keterangan: 'Reservation was canceled due to priority guests from coffeenary'
-                }, {
-                    where: {
-                        id_reservasi: id_reservasi
-                    }
+                res.status(400).json({
+                    success: false,
+                    message: 'Reservations cannot be canceled because they have exceeded the reservation date'
                 })
-
-                if (rejectReservasi) {
-                    res.status(200).json({
-                        success: true,
-                        message: 'Reservation was successfully cancelled'
-                    })
-                } else {
-                    res.status(400).json({
-                        success: false,
-                        message: 'Reservation was usuccessfully cancelled'
-                    })
-                }
             }
         } else {
             res.status(400).json({
@@ -252,21 +295,23 @@ const reject = async (req, res) => {
         })
     }
 }
-controllers.reject = reject
+controllers.reject = [verifyToken, reject]
 
 const editReservationView = async (req, res) => {
     res.render('admin/history/editHistory')
 }
-controllers.editReservationView = [verifyToken,editReservationView]
+controllers.editReservationView = [verifyToken, editReservationView]
 
 const getDetailReservasi = async (req, res) => {
     const id_reservasi = req.params.id_reservasi
     const findReservasi = await Reservasi.findByPk(id_reservasi)
+
     if (findReservasi) {
         const id_user = findReservasi.id_user
         const id_meja = findReservasi.id_meja
         const tanggal_reservasi = findReservasi.tanggal_reservasi
         const jam_mulai = findReservasi.jam_mulai
+        const status = findReservasi.status
 
         const findUser = await User.findByPk(id_user)
         if (findUser) {
@@ -282,16 +327,53 @@ const getDetailReservasi = async (req, res) => {
                         nomor_meja: Meja.nomor_meja
                     }))
 
-                    res.status(200).json({
-                        success: true,
-                        dataReservasi: {
-                            full_name: full_name,
-                            nomor_meja: nomor_meja,
-                            tanggal_reservasi: tanggal_reservasi,
-                            jam_mulai: jam_mulai
-                        },
-                        dataNomorMeja: dataNomorMeja
+                    const dataPesanan = await Pesanan.findOne({
+                        where: {
+                            id_reservasi: id_reservasi
+                        }
                     })
+                    if (dataPesanan) {
+                        const id_pesanan = dataPesanan.id_pesanan
+                        const detailPesanan = await DetailPesanan.findAll({
+                            include: {
+                                model: Menu,
+                                attributes: ['Nama_menu', 'harga_menu'],
+                                as: 'DataMenu'
+                            }, where: {
+                                id_pesanan: id_pesanan
+                            }
+                        })
+
+                        if (detailPesanan.length > 0) {
+                            res.status(200).json({
+                                success: true,
+                                dataReservasi: {
+                                    full_name: full_name,
+                                    nomor_meja: nomor_meja,
+                                    tanggal_reservasi: tanggal_reservasi,
+                                    jam_mulai: jam_mulai,
+                                    status: status
+                                },
+                                dataNomorMeja: dataNomorMeja,
+                                dataPesanan: dataPesanan,
+                                dataDetailPesanan: detailPesanan
+                            })
+                        }
+                    } else {
+                        res.status(200).json({
+                            success: true,
+                            dataReservasi: {
+                                full_name: full_name,
+                                nomor_meja: nomor_meja,
+                                tanggal_reservasi: tanggal_reservasi,
+                                jam_mulai: jam_mulai,
+                                status: status
+                            },
+                            dataNomorMeja: dataNomorMeja
+                        })
+                    }
+
+
                 } else {
                     res.status(400).json({
                         success: false,
@@ -320,7 +402,7 @@ const getDetailReservasi = async (req, res) => {
         })
     }
 }
-controllers.getDetailReservasi = getDetailReservasi
+controllers.getDetailReservasi = [verifyToken, getDetailReservasi]
 
 const editReservation = async (req, res) => {
     const id_reservasi = req.params.id_reservasi
@@ -328,7 +410,7 @@ const editReservation = async (req, res) => {
 
     const findReservasi = await Reservasi.findByPk(id_reservasi)
 
-    if (findReservasi){
+    if (findReservasi) {
         const statusReservasi = findReservasi.status
 
         if (findReservasi && statusReservasi == 'Completed') {
@@ -336,12 +418,12 @@ const editReservation = async (req, res) => {
                 success: false,
                 message: 'Fail, reservation has been completed'
             })
-        } else if (findReservasi && statusReservasi == 'Canceled'){
+        } else if (findReservasi && statusReservasi == 'Canceled') {
             res.status(400).json({
                 success: false,
                 message: 'Fail, the reservation has been canceled'
             })
-        } else{
+        } else {
             if (!nomor_meja) {
                 res.status(400).json({
                     success: false,
@@ -354,18 +436,18 @@ const editReservation = async (req, res) => {
                     const tanggal_Reservasi_objek = new Date(tanggal_reservasi)
                     const tanggal_reservasi_database = new Date(tanggal_Reservasi_objek.toISOString());
                     console.log(tanggal_reservasi_database)
-        
+
                     const jam_mulai = getTglReservasi.jam_mulai
-        
+
                     const getIdMeja = await Meja.findOne({
                         where: {
                             nomor_meja: nomor_meja
                         }
                     })
-        
+
                     if (getIdMeja) {
                         const id_meja = getIdMeja.id_meja
-        
+
                         const findReservasi = await Reservasi.findOne({
                             where: {
                                 id_meja: id_meja,
@@ -373,7 +455,7 @@ const editReservation = async (req, res) => {
                                 jam_mulai: jam_mulai
                             }
                         })
-        
+
                         if (findReservasi) {
                             res.status(400).json({
                                 success: false,
@@ -389,7 +471,7 @@ const editReservation = async (req, res) => {
                                     id_reservasi: id_reservasi
                                 }
                             })
-        
+
                             if (updateReservasi) {
                                 res.status(200).json({
                                     success: true,
@@ -419,6 +501,73 @@ const editReservation = async (req, res) => {
         }
     }
 }
-controllers.editReservation = editReservation
+controllers.editReservation = [verifyToken, editReservation] 
+
+const detailHistoryPesanan = async (req,res) => {
+    const id_pesanan = req.params.id_pesanan
+    const dataPesanan = await Pesanan.findOne({
+        include: {
+            model: User,
+            attributes: ['full_name'],
+            as: 'DataUser'
+        }
+    })
+    if (dataPesanan) {
+        const detailPesanan = await DetailPesanan.findAll({
+            include: {
+                model: Menu,
+                attributes: ['nama_menu', 'harga_menu'],
+                as: 'DataMenu'
+            }, 
+            where: {
+                id_pesanan:id_pesanan
+            }
+        })
+
+        if (detailPesanan.length > 0) {
+            res.status(200).json({
+                success: true,
+                message: 'Order data found',
+                dataPesanan: dataPesanan,
+                dataDetailPesanan: detailPesanan
+            })
+        } else {
+            res.status(400).json({
+                success: false,
+                message: 'Order data not found'
+            })
+        }
+    } else {
+        res.status(400).json({
+            success: false,
+            message: 'Order data not found'
+        })
+    }
+}
+controllers.detailHistoryPesanan = [verifyToken, detailHistoryPesanan]
+
+const dataPesanan = async (req,res) => {
+    const semuaPesanan = await Pesanan.findAll({
+        include: {
+            model: User,
+            attributes: ['full_name'],
+            as: 'DataUser'
+        }
+    })
+    if (semuaPesanan.length > 0) {
+        res.status(200).json({
+            success: true,
+            message: 'Order data found',
+            dataPesanan: semuaPesanan
+        })
+    } else {
+        res.status(400).json({
+            success: false,
+            message: 'Order data not found',
+            dataPesanan: []
+        })
+    }
+}
+controllers.dataPesanan = [verifyToken, dataPesanan]
 
 module.exports = controllers

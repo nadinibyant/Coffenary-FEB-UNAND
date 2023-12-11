@@ -3,6 +3,9 @@ const {
 } = require('express')
 const User = require('../../models/user')
 const Meja = require('../../models/meja')
+const Menu = require('../../models/menu')
+const Pesanan = require('../../models/pesanan')
+const DetailPesanan = require('../../models/detailPesanan')
 const Reservasi = require('../../models/reservasi')
 const controllers = {}
 const jwt = require('jsonwebtoken')
@@ -23,7 +26,7 @@ const verifyToken = (req, res, next) => {
         } else {
             return res.redirect('/login');
         }
-        
+
     } catch (error) {
         return res.redirect('/login');
     }
@@ -75,10 +78,10 @@ controllers.allTableData = allTableData
 const reservationView = async (req, res) => {
     res.render('users/table/reservation')
 }
-controllers.reservationView = [verifyToken,reservationView]
+controllers.reservationView = [verifyToken, reservationView]
 
 const getTableReservation = async (req, res) => {
-   const id_meja = req.params.id_meja
+    const id_meja = req.params.id_meja
 
     const findTable = await Meja.findOne({
         where: {
@@ -181,60 +184,160 @@ const addReservation = async (req, res) => {
                 success: false,
                 message: 'Reservation time should not be earlier than current time',
             });
-        }
+        } else {
 
-        const id_user = req.session.id_user
 
-        const findUser = await User.findByPk(id_user)
-        if (findUser) {
-            const findMeja = await Meja.findOne({
-                where: {
-                    id_meja: id_meja
+            const id_user = req.session.id_user
+
+            const findUser = await User.findByPk(id_user)
+            if (findUser) {
+                const findMeja = await Meja.findOne({
+                    where: {
+                        id_meja: id_meja
+                    }
+                })
+                const jumlah_kursi = findMeja.jumlah_kursi
+                let minimum
+
+                if (jumlah_kursi >= 2 && jumlah_kursi <= 4) {
+                    minimum = 2
+                } else if (jumlah_kursi >= 4){
+                    minimum = 4
                 }
-            })
-            const jumlah_kursi = findMeja.jumlah_kursi
-            if (jumlah_orang > jumlah_kursi) {
-                res.status(400).json({
-                    success: false,
-                    message: 'The number of people exceeds the table capacity'
-                })
-            } else if(jumlah_orang <= 0){
-                res.status(400).json({
-                    success: false,
-                    message: 'The number of people should not be less than 0'
-                })
-            } else {
-                const addDataReservasi = await Reservasi.create({
-                    id_user: id_user,
-                    id_meja: id_meja,
-                    jumlah_orang: jumlah_orang,
-                    tanggal_reservasi: tanggal_reservasi,
-                    jam_mulai: jam_mulai,
-                    jam_selesai: jam_selesai,
-                    status: 'Reserved'
-                })
 
-                if (addDataReservasi) {
-                    res.status(200).json({
-                        success: true,
-                        message: 'Reservation Successful'
-                    })
-                } else {
+                if (jumlah_orang > jumlah_kursi) {
                     res.status(400).json({
                         success: false,
-                        message: 'Reservation Unseccessful'
+                        message: 'The number of people exceeds the table capacity'
                     })
+                } else if (jumlah_orang < minimum) {
+                    res.status(400).json({
+                        success: false,
+                        message: 'The number of people should not be less than 0'
+                    })
+                } else {
+                    const addDataReservasi = await Reservasi.create({
+                        id_user: id_user,
+                        id_meja: id_meja,
+                        jumlah_orang: jumlah_orang,
+                        tanggal_reservasi: tanggal_reservasi,
+                        jam_mulai: jam_mulai,
+                        jam_selesai: jam_selesai,
+                        status: 'Reserved'
+                    })
+
+                    if (addDataReservasi) {
+                        const id_reservasi = addDataReservasi.id_reservasi
+
+                        let pesanan = {};
+                        let total_harga = 0
+                        const dataPesanan = req.body.data_pesanan
+                        if (dataPesanan) {
+                            if (!Array.isArray(dataPesanan)) {
+                                res.status(400).json({
+                                    success: false,
+                                    message: 'Order data must be in an array'
+                                })
+                            } else {
+                                const addPesanan = await Pesanan.create({
+                                    id_user: id_user,
+                                    id_reservasi: id_reservasi,
+                                    total_harga: 0
+                                })
+                                if (addPesanan) {
+                                    const id_pesanan = addPesanan.id_pesanan
+                                    console.log(id_pesanan)
+
+                                    for (const item of dataPesanan) {
+                                        const {
+                                            id_menu,
+                                            jumlah
+                                        } = item
+
+                                        if (!pesanan[id_menu]) {
+                                            pesanan[id_menu] = {
+                                                jumlah: 0,
+                                                total_harga_menu: 0,
+                                                total_harga: 0
+                                            };
+                                        }
+
+                                        pesanan[id_menu].jumlah += jumlah;
+
+                                        const findMenu = await Menu.findByPk(id_menu)
+                                        if (!findMenu) {
+                                            res.status(400).json({
+                                                success: false,
+                                                message: 'Menu data not found'
+                                            })
+                                        } else {
+                                            const total_harga_menu = findMenu.harga_menu * jumlah
+                                            pesanan[id_menu].total_harga_menu += total_harga_menu
+                                            total_harga += pesanan[id_menu].total_harga_menu
+                                            pesanan[id_menu].total_harga += total_harga
+
+
+                                            const addDetailPesanan = await DetailPesanan.create({
+                                                id_pesanan: id_pesanan,
+                                                id_menu: id_menu,
+                                                jumlah: pesanan[id_menu].jumlah,
+                                                total_harga_menu: pesanan[id_menu].total_harga_menu
+                                            })
+                                        }
+                                    }
+                                    const updatePesanan = await Pesanan.update({
+                                        total_harga: total_harga
+                                    }, {
+                                        where: {
+                                            id_pesanan: id_pesanan
+                                        }
+                                    })
+
+                                    if (updatePesanan) {
+                                        res.status(200).json({
+                                            success: true,
+                                            message: 'Your order has been successfully added'
+                                        })
+                                    } else {
+                                        res.status(400).json({
+                                            success: false,
+                                            message: 'Your order was not added successfully'
+                                        })
+                                    }
+
+                                } else {
+                                    res.status(400).json({
+                                        success: false,
+                                        message: 'Order not successful'
+                                    })
+                                }
+
+                            }
+                        } else {
+                            res.status(400).json({
+                                success: false,
+                                message: "You haven't ordered any yet"
+                            })
+                        }
+
+                    } else {
+                        res.status(400).json({
+                            success: false,
+                            message: 'Reservation Unseccessful'
+                        })
+                    }
+
                 }
+            } else {
+                return res.redirect('/login')
             }
-        } else {
-            return res.redirect('/login')
         }
     }
 
 }
 controllers.addReservation = addReservation
 
-const getDetailMeja = async(req,res) => {
+const getDetailMeja = async (req, res) => {
     id_meja = req.params.id_meja
 
     const findMeja = await Meja.findByPk(id_meja)
@@ -252,5 +355,7 @@ const getDetailMeja = async(req,res) => {
     }
 }
 controllers.getDetailMeja = getDetailMeja
+
+
 
 module.exports = controllers
