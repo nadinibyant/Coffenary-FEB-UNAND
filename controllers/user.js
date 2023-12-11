@@ -133,7 +133,8 @@ const login = async (req, res) => {
                     } else {
                         const token = jwt.sign({
                                 id_user: id_user,
-                                username
+                                username,
+                                role : role
                             },
                             process.env.ACCESS_TOKEN_SECRET, {
                                 expiresIn: '2h'
@@ -169,7 +170,8 @@ const login = async (req, res) => {
                     } else {
                         const token = jwt.sign({
                                 id_user: id_user,
-                                username
+                                username,
+                                role : role
                             },
                             process.env.ACCESS_TOKEN_SECRET, {
                                 expiresIn: '2h'
