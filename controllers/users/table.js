@@ -335,7 +335,7 @@ const addReservation = async (req, res) => {
     }
 
 }
-controllers.addReservation = addReservation
+controllers.addReservation = [verifyToken,addReservation]
 
 const getDetailMeja = async (req, res) => {
     id_meja = req.params.id_meja
@@ -355,6 +355,8 @@ const getDetailMeja = async (req, res) => {
     }
 }
 controllers.getDetailMeja = getDetailMeja
+
+
 
 
 

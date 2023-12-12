@@ -6,6 +6,7 @@ router.post('/pesanan', controllers.addpesanan)
 router.get('/allPesanan', controllers.allPesanan)
 router.get('/detailPesananUser/:id_pesanan', controllers.detailPesananUser)
 router.post('/cekHarga', controllers.cekHarga)
+router.get('/allMenuUser', controllers.tampilMenuUser)
 
 
 module.exports = router

@@ -134,27 +134,36 @@ const cancelReservation = async (req, res) => {
                     message: 'Fail, the reservation has been canceled'
                 })
             } else {
-                const updateReservation = await Reservasi.update({
-                    status: 'Canceled',
-                    keterangan: 'The Reservation has been cancelled',
-                    jam_mulai: '',
-                    jam_selesai: ''
-                }, {
-                    where: {
-                        id_reservasi: id_reservasi
-                    }
-                })
-
-                if (updateReservation) {
-                    res.status(200).json({
-                        success: true,
-                        message: 'Reservation Canceled Successfully',
-                    })
-                } else {
+                console.log("current date" + currentDate)
+                console.log("reservasi date" + reservationDate)
+                if (currentDate > reservationDate) {
                     res.status(400).json({
                         success: false,
-                        message: 'Reservation failed to cancel'
+                        message: "can't cancel because it's past the date"
                     })
+                } else {
+                    const updateReservation = await Reservasi.update({
+                        status: 'Canceled',
+                        keterangan: 'The Reservation has been cancelled',
+                        jam_mulai: '',
+                        jam_selesai: ''
+                    }, {
+                        where: {
+                            id_reservasi: id_reservasi
+                        }
+                    })
+
+                    if (updateReservation) {
+                        res.status(200).json({
+                            success: true,
+                            message: 'Reservation Canceled Successfully',
+                        })
+                    } else {
+                        res.status(400).json({
+                            success: false,
+                            message: 'Reservation failed to cancel'
+                        })
+                    }
                 }
             }
         } else {
@@ -255,6 +264,6 @@ const getDetailReservasiUser = async (req, res) => {
         })
     }
 }
-controllers.getDetailReservasiUser =  getDetailReservasiUser
+controllers.getDetailReservasiUser = getDetailReservasiUser
 
 module.exports = controllers

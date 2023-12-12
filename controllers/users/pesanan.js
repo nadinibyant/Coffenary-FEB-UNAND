@@ -135,7 +135,7 @@ const addpesanan = async (req, res) => {
 controllers.addpesanan = [verifyToken, addpesanan]
 
 const allPesanan = async (req, res) => {
-    const id_user = req.params.id_user
+    const id_user = req.session.id_user
     const findUser = await User.findByPk(id_user)
     if (findUser) {
         const findAllPesanan = await Pesanan.findAll({
@@ -248,7 +248,32 @@ const cekHarga = async (req, res) => {
         })
     }
 }
-controllers.cekHarga = cekHarga
+controllers.cekHarga = [verifyToken,cekHarga]
 
+const tampilMenuUser = async (req, res) => {
+    try {
+        const allMenu = await Menu.findAll()
+        if (allMenu) {
+            res.status(200).json({
+                success: true,
+                message: 'Menu data found',
+                data: allMenu
+
+            })
+        } else {
+            res.status(400).json({
+                success: false,
+                message: 'Menu data not found'
+            })
+        }
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: error
+        })
+    }
+
+}
+controllers.tampilMenuUser = [verifyToken, tampilMenuUser]
 
 module.exports = controllers
