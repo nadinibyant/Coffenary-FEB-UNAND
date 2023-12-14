@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Update Table</title>
+    <title>Ordered History</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -12,7 +12,8 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700&family=Poppins:wght@300;500;600;700&family=Princess+Sofia&display=swap"
         rel="stylesheet">
-    <link rel="stylesheet" href="/css/table.css">
+    <link rel="stylesheet" href="/css/reservation.css">
+    <link rel="stylesheet" href="/css/history.css">
     <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
 </head>
 
@@ -27,9 +28,9 @@
                 </div>
             </div>
             <li>
-                <P class="fw-light fs-5  pe-5 ps-5">Hello, <span class="fw-bold" id="username"></span> ! </P>
+                <P class="fw-light fs-5  pe-5 ps-5">Hello, <span class="fw-bold" id="nameuser"></span> ! </P>
             </li>
-            <li class="p-3 ps-4 available">
+            <li class="p-3 ps-4 ">
                 <a class="text-white" href=" /manageTable">
                     <div class="">
                         <div class="row">
@@ -57,7 +58,7 @@
                     </div>
                 </a>
             </li>
-            <li class="p-3 ps-4">
+            <li class="p-3 ps-4 history">
                 <a class="pb-2 text-white" href="/reservationAdmin">
                     <div class="">
                         <div class="row">
@@ -72,7 +73,7 @@
                 </a>
             </li>
             <li class="p-3 ps-4">
-                <a class="pb-2 text-white" href="/profile">
+                <a class="pb-2 text-white " href="/profile">
                     <div class="">
                         <div class="row">
                             <div class="col-3">
@@ -101,41 +102,52 @@
             </li>
         </div>
     </div>
-    <div class="p-4" id="main-content">
-        <div class="container m-5">
-            <div class="w-50 content">
-                <p class="fw-bold fs-1">Update Table</p>
-                <p class="fw-light">Update your table.</p>
-                <form class="">
-                    <div class="mb-4">
-                        <label for="photo" class="form-label fw-bold">Table’s Photo </label>
-                        <input type="file" class="form-control" id="photo">
+    <div class="p-4" id="main-content" style="margin-right: 4cm;">
+        <div class="container p-5 m-5 mb-0">
+            <div class="row">
+                <h3 class="mb-5 fw-bold">Delivery Ordered Detail</h3>
+                <div class="col-7">
+                    <div class="mb-3 w-75">
+                        <label for="full_name" class="form-label fw-bold">Customer Name's :</label>
+                        <p class="mb-4" id="full_name"></p>
                     </div>
-                    <div class="col">
-                        <div class="mb-4">
-                            <label for="numberTable" class="form-label fw-bold">Table’s Number</label>
-                            <input type="number" class="form-control" id="numberTable">
-                        </div>
-                    </div>
-                    <div class="col">
-                        <div class="mb-4">
-                            <label for="numberSeats" class="form-label fw-bold">Number of Seats</label>
-                            <input type="number" class="form-control" id="numberSeats">
-                        </div>
-                    </div>
+                </div>
             </div>
-            <button type="submit" class="btn btn-light btn-add text-white pe-3 ps-3 mt-2 w-50">Update Table</button>
-            </form>
+            <hr>
+            <p class="fw-semibold mt-4">Menu Ordered</p>
+            <table class="table me-5 mt-4 text-center table-striped">
+                <thead class="text-white">
+                    <tr>
+                        <td scope="col" class="col-1">No</td>
+                        <td scope="col" class="col-2">Order Date</td>
+                        <td scope="col" class="col-3">Menu Name</td>
+                        <td scope="col" class="col-2">Price</td>
+                        <td scope="col" class="col-2">Quantity</td>
+                        <td scope="col" class="col-2">Total</td>
+                    </tr>
+                </thead>
+                <tbody id="formTableBody">
+                    <!-- tr data reservation -->
+                </tbody>
+            </table>
+            <div class="text-oranye1 bg-oranye" style="border-radius: 8px; overflow: hidden;">
+                <table class="table me-5 mt-2 text-center table-borderless" >
+                    <thead class="text-oranye1 bg-oranye fw-bold" style="height: 1cm; vertical-align: middle;">
+                        <td scope="col" class="col-10" >Grand Total</td>
+                        <td scope="col" class="col-2" id="grandTotal"></td>
+                    </thead>
+                </table>
+            </div>
         </div>
-
     </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm" crossorigin="anonymous">
     </script>
 
     <script>
-        document.addEventListener("DOMContentLoaded", async function () {
-            //Menampilkan username yg sedang login
+        document.addEventListener('DOMContentLoaded', async function () {
+             //Menampilkan username yg sedang login
             const response = await fetch('/getNama', {
                 method: 'GET'
             });
@@ -143,16 +155,17 @@
 
             if (data.success) {
                 const username = data.username;
-                const usernameProfile = document.getElementById('username');
+                const usernameProfile = document.getElementById('nameuser');
                 usernameProfile.textContent = `${username}`;
             } else {
                 window.location.href = '/login';
             }
 
-            //Mengambil id meja dari URL
-            function idMejaFromURL() {
+
+            //Mengambil id URL
+            function idPesananFromURL() {
                 const url = window.location.href;
-                const regex = /\/editTable\/(.+)$/;
+                const regex = /\/pesananDetail\/(.+)$/;
                 const match = url.match(regex);
 
                 if (match && match[1]) {
@@ -162,70 +175,84 @@
                 }
             }
 
-            //Menampilkan data meja yang akan diedit
-            const id_meja = idMejaFromURL()
+            const id_pesanan = idPesananFromURL()
+            console.log(id_pesanan)
+            
+            const tbody = document.getElementById("formTableBody");
+            const tableBody = document.getElementById("formTableBody");
+            const grandTotalElement = document.getElementById("grandTotal");
+            const full_name = document.getElementById("full_name");
+
             try {
-                const response = await fetch(`/getDataTable/${id_meja}`);
+                const response = await fetch(`/detailPesanan/${id_pesanan}`);
                 const data = await response.json();
 
-                if (data.success) {
-                    const dataTable = data.data;
-                    document.getElementById("numberTable").value = dataTable.nomor_meja;
-                    document.getElementById("numberSeats").value = dataTable.jumlah_kursi;
+                if (data.success === true) {
+                    const ordersDetail = data.dataDetailPesanan;
+                    const dataPesanan = data.dataPesanan;
+                    var i = 1;
+                    
+
+                    ordersDetail.forEach((pesanan) => {
+                        const tr = document.createElement("tr");
+                        tbody.appendChild(tr);
+
+                        const no = document.createElement("td");
+                        const orderDate = document.createElement('td');
+                        const menuName = document.createElement('td');
+                        const price = document.createElement('td');
+                        const quantity = document.createElement("td");
+                        const total = document.createElement("td");
+
+                        tr.appendChild(no);
+                        tr.appendChild(orderDate);
+                        tr.appendChild(menuName);
+                        tr.appendChild(price);
+                        tr.appendChild(quantity);
+                        tr.appendChild(total);
+
+                        no.setAttribute('scope', 'row');
+                        no.innerHTML = i;
+
+                        const createdAt = new Date(pesanan.created_at);
+                        const formattedDate = createdAt.toLocaleDateString('en-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+
+                        orderDate.innerText = formattedDate;
+                        menuName.innerText = pesanan.DataMenu.nama_menu;
+                        price.innerText = `Rp ${pesanan.DataMenu.harga_menu.toLocaleString()}`;
+                        quantity.innerText = pesanan.jumlah;
+                        total.innerText = `Rp ${pesanan.total_harga_menu.toLocaleString()}`;
+                        i++;
+                    });
+                    //Name 
+                    full_name.innerText = dataPesanan.DataUser.full_name;
+                    //Total Pesanan
+                    const grandTotal = ordersDetail.reduce((total, pesanan) => total + pesanan.total_harga_menu, 0);
+                    grandTotalElement.innerText = `Rp ${grandTotal.toLocaleString()}`;
                 } else {
-                    alert(data.message);
+                    // Handle the case where the request was not successful
+                    console.error('Error fetching reservation details:', data.message);
                 }
             } catch (error) {
-                console.error(error);
+                console.error('Error fetching reservation details:', error);
             }
-
-            //Menyimpan pengeditan data meja
-            const form = document.querySelector('form');
-            form.addEventListener('submit', async (event) => {
-                event.preventDefault();
-
-                const numberTable = document.getElementById('numberTable').value;
-                const numberSeats = document.getElementById('numberSeats').value;
-                const file = document.getElementById('photo');
-
-                const formData = new FormData();
-                formData.append('numberTable', numberTable);
-                formData.append('numberSeats', numberSeats);
-                formData.append('file', file.files[0]);
-
-                const response = await fetch('/editTable/' +
-                    id_meja, {
-                        method: 'POST',
-                        body: formData
-                    });
-
-                const data = await response.json();
-
-                if (data.success == true) {
-                    alert(data.message);
-                    window.location.href = '/manageTable';
-                } else if (data.success == false) {
-                    alert(data.message);
-                }
-            });
-
+            
             //Logout
             const btnLogout = document.getElementById('btn-logout');
             btnLogout.addEventListener('click', async function (event) {
                 event.preventDefault();
                 const confirmLogout = confirm("Are you sure want to logout from this web?");
 
-                if(confirmLogout) {
+                if (confirmLogout) {
                     try {
                         const response = await fetch('/logout', {
                             method: 'POST'
                         });
-                        const data = await response.json();
-
-                        if (data.success) {
+            
+                        if (response.status === 200) {
                             window.location.href = '/login';
                         } else {
-                            console.log(data.message);
+                            console.log('Logout failed');
                             location.reload();
                         }
                     } catch (error) {

@@ -151,25 +151,31 @@ controllers.getJam = getJam
 const addReservation = async (req, res) => {
     const id_meja = req.params.id_meja
     const jumlah_orang = req.body.jumlah_orang
-
     const tanggal = req.body.tanggal_reservasi
+    const jam_mulai = req.body.jam_mulai
 
     const tanggalSekarang = new Date();
     tanggalSekarang.setHours(0, 0, 0, 0);
 
     const tanggal_reservasi = new Date(`${tanggal}T00:00:00Z`);
 
-    const jam_mulai = req.body.jam_mulai
+    const selectedDateTime = new Date(`${tanggal_reservasi}T${jam_mulai}`);
+    const currentDateTime = new Date();
 
-    if (!jumlah_orang || !tanggal || !jam_mulai) {
+   if (!jumlah_orang || !tanggal || !jam_mulai) {
+       res.status(400).json({
+           success: false,
+           message: 'Complete The Empty Data Input'
+       })
+   } else if (tanggal_reservasi < tanggalSekarang) {
+       res.status(400).json({
+           success: false,
+           message: 'Reservation date should not be earlier than today',
+       });
+   } else if (selectedDateTime.getTime() <= currentDateTime.getTime()) {
         res.status(400).json({
             success: false,
-            message: 'Complete The Empty Data Input'
-        })
-    } else if (tanggal_reservasi < tanggalSekarang) {
-        res.status(400).json({
-            success: false,
-            message: 'Reservation date should not be earlier than today',
+            message: 'Reservation time should not be earlier than current time',
         });
     } else {
         const jamObj = new Date(`2000-01-01T${jam_mulai}`);
@@ -178,17 +184,15 @@ const addReservation = async (req, res) => {
 
         const jamReservasi = new Date(`2000-01-01T${jam_mulai}`);
         const jamSekarang = new Date();
-
-        if (jamReservasi <= jamSekarang) {
+ 
+        if (tanggal_reservasi === tanggalSekarang && jamReservasi < jamSekarang) {
             res.status(400).json({
                 success: false,
                 message: 'Reservation time should not be earlier than current time',
             });
         } else {
-
-
             const id_user = req.session.id_user
-
+            
             const findUser = await User.findByPk(id_user)
             if (findUser) {
                 const findMeja = await Meja.findOne({
@@ -197,6 +201,7 @@ const addReservation = async (req, res) => {
                     }
                 })
                 const jumlah_kursi = findMeja.jumlah_kursi
+                
                 let minimum
 
                 if (jumlah_kursi >= 2 && jumlah_kursi <= 4) {

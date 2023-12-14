@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Update Reservation</title>
+    <title>Add Table</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -29,7 +29,7 @@
             <li>
                 <P class="fw-light fs-5  pe-5 ps-5">Hello, <span class="fw-bold" id="username"></span> ! </P>
             </li>
-            <li class="p-3 ps-4 available">
+            <li class="p-3 ps-4">
                 <a class="text-white" href=" /manageTable">
                     <div class="">
                         <div class="row">
@@ -43,7 +43,7 @@
                     </div>
                 </a>
             </li>
-            <li class="p-3 ps-4">
+            <li class="p-3 ps-4 available">
                 <a class="pb-2 text-white" href="/manageMenu">
                     <div class="">
                         <div class="row">
@@ -57,7 +57,7 @@
                     </div>
                 </a>
             </li>
-            <li class="p-3 ps-4 history">
+            <li class="p-3 ps-4">
                 <a class="pb-2 text-white" href="/reservationAdmin">
                     <div class="">
                         <div class="row">
@@ -72,7 +72,7 @@
                 </a>
             </li>
             <li class="p-3 ps-4">
-                <a class="pb-2 text-white " href="/profile">
+                <a class="pb-2 text-white" href="/profile">
                     <div class="">
                         <div class="row">
                             <div class="col-3">
@@ -103,54 +103,28 @@
     </div>
     <div class="p-4" id="main-content">
         <div class="container m-5">
-            <div class="w-75 content">
-                <p class="fw-bold fs-1">Update Reservation</p>
-                <p class="fw-light">Update customer’s reservation to make sure they’re still get their seat available.
-                </p>
-                <form class="">
+            <div class="w-50 content">
+                <p class="fw-bold fs-1">Add Menu</p>
+                <p class="fw-light">Add new menu to your shop.</p>
+                <form id="addTable">
                     <div class="mb-4">
-                        <label for="photo" class="form-label fw-bold">Customer's Name</label>
-                        <div class="card">
-                            <div class="card-body" id="full_name">
-                        </div>
+                        <label for="file" class="form-label fw-bold">Menu’s Photo </label>
+                        <input type="file" class="form-control" id="file">
                     </div>
-                    <div class="mt-4">
+                    <div class="col">
                         <div class="mb-4">
-                            <label for="numberTable" class="form-label fw-bold">Table’s Number</label>
-                            <div class="text-center">
-                                <div class="row">
-                                    <div class="col text-start">
-                                        <div class="card">
-                                                <div class="card-body" id="number_table_old">
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col w-75">
-                                        <select class="form-select" aria-label="Default select example" id="nomor_meja" style="height: 57px;">
-                                        </select>
-                                    </div>
-                                </div>
-                            </div>
-
+                            <label for="menuName" class="form-label fw-bold">Menu’s Name</label>
+                            <input type="text" class="form-control" id="menuName">
                         </div>
                     </div>
-                    <div class="mb-4">
-                        <label for="photo" class="form-label fw-bold">Reservation Date</label>
-                        <div class="card">
-                            <div class="card-body" id="reservation_date">
-                            </div>
-                        </div>
-                    </div>
-                    <div class="mb-4">
-                        <label for="photo" class="form-label fw-bold">Start Booking Hours*</label>
-                        <p class="text-secondary fs-6">*Reservation only last 30 minutes.</p>
-                        <div class="card">
-                            <div class="card-body" id="jam_mulai">
-                            </div>
+                    <div class="col">
+                        <div class="mb-4">
+                            <label for="menuPrice" class="form-label fw-bold">Menu’s Price</label>
+                            <input type="number" class="form-control" id="menuPrice">
                         </div>
                     </div>
             </div>
-            <button type="submit" class="btn btn-light btn-add text-white pe-3 ps-3 mt-2 w-50">Update Reservation</button>
+            <button type="submit" class="btn btn-light btn-add text-white pe-3 ps-3 mt-2 w-50">Add Menu</button>
             </form>
         </div>
 
@@ -160,7 +134,7 @@
     </script>
 
     <script>
-         document.addEventListener("DOMContentLoaded", async function () {
+        document.addEventListener("DOMContentLoaded", async function () {
             //Menampilkan username yg sedang login
             const response = await fetch('/getNama', {
                 method: 'GET'
@@ -175,92 +149,38 @@
                 window.location.href = '/login';
             }
 
-            //Mengambil id_reservasi dari URL
-            function idReservationFromURL() {
-                const url = window.location.href;
-                const regex = /\/editReservationView\/(.+)$/;
-                const match = url.match(regex);
-
-                if (match && match[1]) {
-                    return match[1];
-                } else {
-                    return null; 
-                }
-            }
-
-            const fullName = document.getElementById("full_name");
-            const numberTableOld = document.getElementById("number_table_old");
-            const reservationDate = document.getElementById("reservation_date");
-            const startBookingHours = document.getElementById("jam_mulai");
-
-            const id_reservasi = idReservationFromURL()
-
-            //Menampilkan data reservasi yang akan diedit
-            try {
-                const response = await fetch(`/getDetailReservasi/${id_reservasi}`);
-                const data = await response.json();
-
-                if (data.success) {
-                    const dataReservasi = data.dataReservasi;
-                    const dataNomorMeja = data.dataNomorMeja;
-
-                    fullName.innerHTML  = dataReservasi.full_name;
-                    numberTableOld.innerHTML  = dataReservasi.nomor_meja;
-                    reservationDate.innerHTML  = dataReservasi.tanggal_reservasi;
-                    startBookingHours.innerHTML  = dataReservasi.jam_mulai;
-                    
-                    const nomorMejaDropdown = document.getElementById("nomor_meja");
-                    nomorMejaDropdown.innerHTML = "";
-                    dataNomorMeja.forEach((nomorMeja) => {
-                        const option = document.createElement("option");
-                        option.value = nomorMeja.nomor_meja;
-                        option.textContent = nomorMeja.nomor_meja;
-                        nomorMejaDropdown.appendChild(option);
-                    });
-                } else {
-                    alert(data.message);
-                }
-            } catch (error) {
-                console.error(error);
-            }
-
-            //Menyimpan data edit reservasi
+            //Mengirim data menu
             const form = document.querySelector('form');
-            form.addEventListener('submit', async (event)=> {
+            form.addEventListener('submit', async (event) => {
                 event.preventDefault();
 
-                const nomorMeja = document.getElementById("nomor_meja").value;
-                if (!nomorMeja) {
-                    alert('Complete The Empty Data Input');
-                    return;
-                }
+                const file = document.getElementById('file');
+                const menuName = document.getElementById('menuName').value;
+                const menuPrice = document.getElementById('menuPrice').value;
                 
-                try {
-                    const response = await fetch(`/editReservation/${id_reservasi}`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            nomor_meja: nomorMeja
-                        })
-                    });
+                const formData = new FormData();
+                formData.append('file', file.files[0]);
+                formData.append('menuName', menuName);
+                formData.append('menuPrice', menuPrice);
 
-                    const data = await response.json();
-                    if (data.success) {
-                        alert(data.message);
-                        window.location.href = '/reservationAdmin';
-                    } else {
-                        alert(data.message);
-                    }
-                    
-                } catch (error) {
-                    console.error(error);
-                    alert('Terjadi kesalahan saat menyimpan data reservasi.');
+                const response = await fetch('/addMenu', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+
+                if (data.success == true) {
+                    alert(data.message);
+                    window.location.href = '/manageMenu';
+                } else if (data.success == false) {
+                    alert(data.message);
+                } else {
+                    alert('Jenis File Tidak di Izinkan')
                 }
             })
 
-            //Logout
+             //Logout
             const btnLogout = document.getElementById('btn-logout');
             btnLogout.addEventListener('click', async function (event) {
                 event.preventDefault();
@@ -284,7 +204,7 @@
                     }
                 }
             });
-
+            
         });
     </script>
 </body>

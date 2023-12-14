@@ -43,6 +43,20 @@
                     </div>
                 </a>
             </li>
+            <li class="p-3 ps-4">
+                <a class="pb-2 text-white" href="/manageMenu">
+                    <div class="">
+                        <div class="row">
+                            <div class="col-3">
+                                <iconify-icon icon="mdi:food" width="30"></iconify-icon>
+                            </div>
+                            <div class="col-9 ps-0 pt-1 text-start">
+                                Manage Menu
+                            </div>
+                        </div>
+                    </div>
+                </a>
+            </li>
             <li class="p-3 ps-4 history">
                 <a class="pb-2 text-white" href="/reservationAdmin">
                     <div class="">
@@ -88,26 +102,59 @@
         </div>
     </div>
     <div class="p-4" id="main-content">
-        <div class="div1 me-5 mt-5 ">
-            <p class="fw-bold pb-4 ">History dan Pemesanan</p>
+        <div class="container" id="nav">
+            <ul class="nav nav-tabs justify-content-center text-center">
+                <li class="nav-item">
+                    <a class="nav-link text-oranye active" aria-current="page" href="/reservationAdmin">Reservation History</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link text-oranye" href="/allDataPesanan">Order Delivery</a>
+                </li>
+            </ul>
+        </div>
+            <p class="fw-bold py-4 ">Manage Reservation History</p>
             <table class="table me-5 text-center table-striped ">
                 <thead class="text-white">
                     <tr>
-                        <td scope="col">No</td>
-                        <td scope="col">Name</td>
-                        <td scope="col">Reservation Date</td>
-                        <td scope="col">Reservation Time</td>
-                        <td scope="col">Number of Table</td>
-                        <td scope="col">Number of People</td>
-                        <td scope="col">Status</td>
-                        <td scope="col">Action</td>
+                        <td scope="col" class="col-1">No</td>
+                        <td scope="col" class="col-2">Name</td>
+                        <td scope="col" class="col-1">Reservation Date</td>
+                        <td scope="col" class="col-1">Reservation Time</td>
+                        <td scope="col" class="col-1">Number of Table</td>
+                        <td scope="col" class="col-1">Number of People</td>
+                        <td scope="col" class="col-1">Status</td>
+                        <td scope="col" class="col-4">Action</td>
                     </tr>
                 </thead>
                 <tbody class="text-center " id="formTableBody">
                     <!-- tr data reservation -->
                 </tbody>
             </table>
-        </div>
+            <div class="modal fade" id="rejectModal" tabindex="-1" aria-labelledby="rejectModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h1 class="modal-title fs-5" id="rejectModalLabel">Reservation Rejection</h1>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <form id="rejectForm">
+                                <div class="mb-3">
+                                    <label for="reject-message" class="col-form-label">Who is coming?</label>
+                                    <select class="form-select" aria-label="Default select example">
+                                        <option value="Prioritas" id="reject-message">1. Customer Prioritas</option>
+                                        <option value="Non Prioritas" id="reject-message">2. Customer Regular</option>
+                                      </select>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            <button type="button" class="btn btn-danger" id="rejectSubmitBtn">Reject</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm" crossorigin="anonymous">
@@ -115,7 +162,7 @@
 
     <script>
         document.addEventListener("DOMContentLoaded", async function () {
-            //Menampilkan username yg sedang login
+           //Menampilkan username yg sedang login
            const response = await fetch('/getNama', {
                 method: 'GET'
             });
@@ -167,6 +214,7 @@
 
                         no.innerHTML = i;
                         fullName.innerHTML = dataReservation.full_name
+
                         if( dataReservation.tanggal_reservasi === "0000-00-00") {
                             reservationDate.innerHTML = " - " 
                         } else {
@@ -178,10 +226,12 @@
                         } else{
                             reservationTime.innerHTML = dataReservation.jam_mulai + " - " + dataReservation.jam_selesai
                         }
+
                         numberTable.innerHTML = " Table " + dataReservation.nomor_meja
                         amountPeople.innerHTML = dataReservation.jumlah_orang + "  People"
+
                          //btn status
-                         const statusBedge = document.createElement("span")
+                        const statusBedge = document.createElement("span")
                         statusBedge.classList.add("badge", "p-2")
                         statusBedge.textContent = dataReservation.status
                         status.appendChild(statusBedge);
@@ -204,26 +254,45 @@
                         doneBtn.classList.add("col-3");
                         const rejectBtn = document.createElement("a")
                         rejectBtn.classList.add("col-3");
+                        const detailBtn = document.createElement("a")
+                        detailBtn.classList.add("col-3");
 
+                        //Edit Button
                         editBtn.classList.add("btn", "btn-warning", "btn-sm", "pe-4", "ps-4");
                         editBtn.innerHTML = "Edit";
-                        editBtn.style.marginRight = "8px";
+                        editBtn.style.marginRight = "2px";
+                        editBtn.style.width = "75px";
                         buttonContainer.appendChild(editBtn)
                         editBtn.addEventListener('click', function() {
                             window.location.href = '/editReservationView/' + dataReservation.id_reservasi;
                         });
 
+                        //Done Button
                         doneBtn.setAttribute('data-id', dataReservation.id_reservasi);
                         doneBtn.classList.add("btn", "btn-success", "doneBtn", "btn-sm", "pe-4", "ps-4");
                         doneBtn.innerHTML = "Done";
-                        doneBtn.style.marginRight = "8px";
+                        doneBtn.style.marginRight = "2px";
+                        doneBtn.style.width = "85px";
                         buttonContainer.appendChild(doneBtn);
 
+                        //Reject Button
                         rejectBtn.setAttribute('data-id', dataReservation.id_reservasi);
                         rejectBtn.classList.add("btn", "btn-danger", "rejectBtn", "btn-sm", "pe-4", "ps-4");
                         rejectBtn.innerHTML = "Reject ";
-                        rejectBtn.style.marginRight = "8px";
+                        rejectBtn.style.marginRight = "2px";
+                        rejectBtn.style.width = "88px";
                         buttonContainer.appendChild(rejectBtn);
+
+                        //Detail Button
+                        detailBtn.classList.add("btn", "btn-primary", "btn-sm", "pe-4", "ps-4");
+                        detailBtn.innerHTML = "Detail";
+                        detailBtn.style.marginRight = "2px";
+                        detailBtn.style.width = "85px";
+                        buttonContainer.appendChild(detailBtn)
+                        detailBtn.addEventListener('click', function() {
+                            window.location.href = '/detailReservasiView/' + dataReservation.id_reservasi;
+                        });
+
 
                         action.appendChild(buttonContainer);
                     });
@@ -260,22 +329,46 @@
             console.log(btnReject);
 
             for (let i = 0; i < btnReject.length; i++) {
-                btnReject[i].addEventListener('click', async function () {
-                    const id_reservasi = btnReject[i].getAttribute('data-id')
-                    console.log(id_reservasi)
+                btnReject[i].addEventListener('click', function () {
+                    const id_reservasi = btnReject[i].getAttribute('data-id');
+                    console.log(id_reservasi);
 
-                    const response = await fetch(`/reject/${id_reservasi}`, {
-                        method: 'GET'
-                    }); 
-                    const data = await response.json();
+                    const rejectModal = new bootstrap.Modal(document.getElementById('rejectModal'));
+                    rejectModal.show();
 
-                    if (data.success == true) {
-                        alert(data.message)
-                        location.reload()
-                    } else if (data.success == false) {
-                        alert(data.message)
-                    }
-                })
+                    const rejectSubmitBtn = document.getElementById('rejectSubmitBtn');
+                    rejectSubmitBtn.addEventListener('click', async function () {
+                        const rejectReasonSelect = document.getElementById('reject-message');
+                        const rejectReason = rejectReasonSelect.value;
+
+                        if (rejectReason === 'Select') {
+                            alert('Please select a rejection reason.');
+                            return;
+                        } 
+                     
+                        try {
+                            const url = `/reject/${id_reservasi}?keterangan=${encodeURIComponent(rejectReason)}`;
+                            const response = await fetch(url, {
+                                method: "GET",
+                                headers: {
+                                    "Content-Type": "application/json",
+                                },
+                            });
+
+                            const data = await response.json();
+
+                            if (data.success) {
+                                alert(data.message);
+                                location.reload();
+                            } else {
+                                alert(data.message);
+                            }
+                        } catch (error) {
+                            console.error(error);
+                        }
+                        rejectModal.hide();
+                    });
+                });
             }
 
             //Logout

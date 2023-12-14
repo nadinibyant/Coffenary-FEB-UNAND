@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Reservation Table</title>
+    <title>Menu</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -12,6 +12,7 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700&family=Poppins:wght@300;500;600;700&family=Princess+Sofia&display=swap"
         rel="stylesheet">
+    <link rel="stylesheet" href="/css/available.css">
     <link rel="stylesheet" href="/css/reservation.css">
     <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
 </head>
@@ -29,7 +30,7 @@
             <li>
                 <P class="fw-light fs-5  pe-5 ps-5">Hello, <span class="fw-bold" id="username"></span> ! </P>
             </li>
-            <li class="p-3 ps-5 available">
+            <li class="p-3 ps-5 ">
                 <a class="pb-2 text-white" href="/table">
                     <div class="">
                         <div class="row">
@@ -43,7 +44,7 @@
                     </div>
                 </a>
             </li>
-            <li class="p-3 ps-5">
+            <li class="p-3 ps-5 available">
                 <a class="pb-2 text-white" href="/menuUser">
                     <div class="">
                         <div class="row">
@@ -101,61 +102,14 @@
             </li>
         </div>
     </div>
-    <div class="p-4" id="main-content" style="margin-right: 3cm;">
-        <div class="container p-5 m-5 mb-0">
-            <div class="row">
-                <h3 class="mb-5 fw-bold">Reservation Confirmation</h3>
-                <div class="col">
-                    <p class="fw-bold">Choosen Table</p>
-                    <div class="col-3 mb-4">
-                        <div class="card" style="width: 17rem;">
-                            <img src="" class="card-img-top p-4 pb-0" alt="Foto Meja" id="foto">
-                            <div class="card-body p-4">
-                                <div class="">
-                                    <div class="row">
-                                        <div class="col fw-bold pb-2" id="numberTable">
-                                            <!-- nomor meja -->
-                                        </div>
-                                        <div class="col text-end">
-                                            
-                                        </div>
-                                    </div>
-                                </div>
-                                <p id="numberSeats">
-                                    <!-- jumlah kursi -->
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-7">
-                    <p class="fw-bold">Orderer's Identity</p>
-                    <p class="fw-light">Input your identity to confirm the reservation </p>
-                    <form>
-                        <div class="mb-3 w-75">
-                            <label for="jumlah_orang" class="form-label fw-bold">Number Of Persons</label>
-                            <input type="number" class="form-control" id="jumlah_orang">
-                        </div>
-                        <div class="mb-3 w-75">
-                            <label for="tanggal_reservasi" class="form-label fw-bold">Reservation Date</label>
-                            <input type="date" class="form-control" id="tanggal_reservasi">
-                        </div>
-                        <button type="change" class="btn text-white btn-success mb-3" id="check">Check</button>
-                        <div class="mb-3 w-75">
-                            <label for="time" class="form-label fw-bold">Start Booking Hours*</label>
-                            <select class="form-select" aria-label="Default select example" id="jam_mulai">
-                                <!-- menampilkan jam yang tersedia -->
-                            </select>
-                        </div>
-                        <p class="text-secondary">*Reservation only last 30 minutes.</p>
-                    </form>
-                </div>
-            </div>
-        </div>
-
-        <form>
-            <div class="container p-5 mx-5">  
-                <p class="fw-bold">Choose Menu</p>
+    <div class="p-4" id="main-content">
+        <h3 class="fw-bold mt-2">Our Menu</h3>
+        <p class="fw-light">Coffeenary Delivery! Siap Pesan-Antar ke seluruh area kampus UNAND</p>
+        <div class="container mt-4">
+            <form>
+                <div class="row" id="tableContainer" >
+                    <!-- data menu -->
+                </div> 
                 <div class="row justify-content-between text-end">
                     <div class="container">
                         <div class="row" id="menu-list-container">  
@@ -179,14 +133,15 @@
                 </div>
             </form>
         </div>
+    </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm" crossorigin="anonymous">
     </script>
 
     <script>
-        document.addEventListener('DOMContentLoaded', async function () {
-            //Menampilkan username yang sedang login
+        document.addEventListener("DOMContentLoaded", async function () {
+            //Menampilkan username yg sedang login
             const response = await fetch('/getNama', {
                 method: 'GET'
             });
@@ -201,87 +156,6 @@
                 window.location.href = '/login';
             }
 
-            //Mengambil id URL
-            function idMejaFromURL() {
-                const url = window.location.href;
-                const regex = /\/reservationTable\/(.+)$/;
-                const match = url.match(regex);
-
-                if (match && match[1]) {
-                    return match[1];
-                } else {
-                    return null; 
-                }
-            }
-
-            //Menampilkan data meja
-            const fotoMeja  = document.getElementById("foto");
-            const numberTable = document.getElementById("numberTable");
-            const numberSeats = document.getElementById("numberSeats");
-
-            const id_meja = idMejaFromURL()
-
-            try {
-                const response = await fetch(`/getDataReservationTable/${id_meja}`);
-                const data = await response.json();
-
-                if (data.success) {
-                    const dataTable = data.data;
-                    fotoMeja.src = `/img/meja/${dataTable.foto_meja}`;
-                    numberTable.innerHTML  = "Meja " + dataTable.nomor_meja;
-                    numberSeats.textContent  = dataTable.jumlah_kursi + " Seats";
-                } else {
-                    alert(data.message);
-                }
-            } catch (error) {
-                console.error(error);
-            }
-
-            //Menampilkan jam yang tersedia
-            const jamMulaiSelect = document.getElementById("jam_mulai");
-            const checkButton = document.getElementById("check");
-
-            checkButton.addEventListener('click', async () => {
-                event.preventDefault();
-                const tanggalReservasiInput = document.getElementById("tanggal_reservasi").value;
-
-                try {
-                    const response = await fetch(`/getJam/${id_meja}`, {
-                        method: 'POST', 
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            tanggal_reservasi: tanggalReservasiInput
-                        })
-                    });
-                    const data = await response.json();
-
-                    jamMulaiSelect.innerHTML = '';
-
-                    if (data.status === 'beberapa') {
-                        const jamTersedia = data.data;
-                        jamTersedia.forEach((jam) => {
-                            const option = document.createElement('option');
-                            option.value = jam.replace(/\./g, ':');
-                            option.textContent = jam;
-                            jamMulaiSelect.appendChild(option);
-                        });
-                    } else if (data.status === 'semua') {
-                        const semuaJam = data.data;
-                        semuaJam.forEach((jam) => {
-                            const option = document.createElement('option');
-                            option.value = jam.replace(/\./g, ':');
-                            option.textContent = jam;
-                            jamMulaiSelect.appendChild(option);
-                        });
-                    }
-                } catch (error) {
-                    console.error(error);
-                }
-                
-            });
-
             //Menampilkan daftar menu 
             const menuListContainer = document.getElementById('menu-list-container');
             try {
@@ -289,18 +163,19 @@
                 const data = await response.json();
 
                 if (data.success) {
-                    const menuList = data.data;
-                    menuList.forEach(menu => {
-                        const menuCard = document.createElement('div');
+                    const menuList  = data.data;
+
+                    menuList .forEach((menu) => {
+                       const menuCard = document.createElement('div');
                         menuCard.classList.add('menuCard', 'col', 'mb-4');
 
                         menuCard.dataset.menuId = menu.id_menu;
 
                         const cardInner = document.createElement('div');
                         cardInner.classList.add('card');
-                        cardInner.style.width = '16rem';
+                        cardInner.style.width = "18rem";
 
-                        const img = document.createElement('img');
+                         const img = document.createElement('img');
                         img.src = `/img/menu/${menu.foto_menu}`;
                         img.classList.add('card-img-top', 'p-4', 'pb-0');
                         img.alt = "Menu Image";
@@ -352,13 +227,13 @@
                         menuListContainer.appendChild(menuCard);
                     });
                 } else {
-                    alert(dataMenu.message);
+                    console.log(data.message);
                 }
             } catch (error) {
-                console.error(error);
+                console.log(error);
             }
 
-            ///Cek Price
+            //Cek Price
             menuListContainer.addEventListener('input', function (event) {
                 const target = event.target;
                 if (target.classList.contains('inputAmount')) {
@@ -399,58 +274,50 @@
                     console.error(error);
                 }
             }
-            
-            //Menyimpan data reservasi 
+
+            //Add pesanan
             const makeOrderButton = document.getElementById('makeOrder');
 
             makeOrderButton.addEventListener('click', async () => {
-                const jumlahOrangInput = document.getElementById('jumlah_orang');
-                const tanggalReservasiInput = document.getElementById('tanggal_reservasi');
-                const jamMulaiInput = document.getElementById('jam_mulai');
+                const menuCards = document.querySelectorAll('.menuCard');
+                const selectedMenus = [];
 
-                const jumlahOrang = parseInt(jumlahOrangInput.value, 10) || 0;
-                const tanggalReservasi = tanggalReservasiInput.value;
-                const jamMulai = jamMulaiInput.value;
+                let isAnyMenuSelected = false;
 
-                const selectedDateTime = new Date(`${tanggalReservasi}T${jamMulai}`);
-                const currentDateTime = new Date();
-
-                if (selectedDateTime.getTime() <= currentDateTime.getTime()) {
-                    alert('Reservation time should not be earlier than or equal to current time');
-                    return;
-                }
-                
-                const orderData = Array.from(document.querySelectorAll('.menuCard')).map((menuCard) => {
+                menuCards.forEach((menuCard) => {
                     const menuId = menuCard.dataset.menuId;
                     const inputAmount = menuCard.querySelector('.inputAmount');
                     const jumlah = parseInt(inputAmount.value, 10) || 0;
 
-                    return { id_menu: menuId, jumlah };
+                    if (jumlah > 0) {
+                        selectedMenus.push({
+                            id_menu: menuId,
+                            jumlah: jumlah,
+                        });
+
+                        isAnyMenuSelected = true;
+                    }
                 });
-            
-                const reservationData = {
-                    jumlah_orang: jumlahOrang,
-                    tanggal_reservasi: tanggalReservasi,
-                    jam_mulai: jamMulai,
-                    data_pesanan: orderData,
-                };
-                console.log('orderData:', orderData);
+
+                if (!isAnyMenuSelected) {
+                    alert('Please select at least one menu before making an order.');
+                    return;
+                }
 
                 try {
-                     const response = await fetch(`/addReservation/${id_meja}`, {
+                    const response = await fetch('/pesanan', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
                         },
-                        body: JSON.stringify(reservationData),
+                        body: JSON.stringify(selectedMenus),
                     });
 
                     const data = await response.json();
-                    console.log('Add Reservation Response:', data);
 
-                    if (data.success === true) {
-                    alert(data.message);
-                    window.location.href = '/table';
+                    if (data.success === true ) {
+                        alert(data.message);
+                        window.location.href = '/menuUser';
                     } else if (data.success === false) {
                         alert(data.message);
                     } else {
@@ -459,7 +326,7 @@
                 } catch (error) {
                     console.error(error);
                 }
-            });
+            })
 
             //Logout
             const btnLogout = document.getElementById('btn-logout');

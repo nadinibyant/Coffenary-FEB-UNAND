@@ -86,11 +86,11 @@ const uploadd = upload.single('file')
 
 const tambahMenu = async (req, res) => {
     try {
-        const foto_menu = req.file
-        const nama_menu = req.body.nama_menu
-        const harga_menu = req.body.harga_menu
+        const file = req.file
+        const menuName = req.body.menuName
+        const menuPrice = req.body.menuPrice
 
-        if (!foto_menu || !nama_menu || !harga_menu) {
+        if (!file || !menuName || !menuPrice) {
             res.status(400).json({
                 success: false,
                 message: 'Please complete the menu data'
@@ -98,7 +98,7 @@ const tambahMenu = async (req, res) => {
         } else {
             const findMenu = await Menu.findOne({
                 where: {
-                    nama_menu: nama_menu
+                    nama_menu: menuName
                 }
             })
             if (findMenu) {
@@ -108,9 +108,9 @@ const tambahMenu = async (req, res) => {
                 })
             } else {
                 const addMenu = await Menu.create({
-                    foto_menu: foto_menu.originalname,
-                    nama_menu: nama_menu,
-                    harga_menu: harga_menu,
+                    foto_menu: file.originalname,
+                    nama_menu: menuName,
+                    harga_menu: menuPrice,
                     status: 'Available'
                 })
                 if (addMenu) {
@@ -141,7 +141,7 @@ const editMenu = async (req, res) => {
         const id_menu = req.params.id_menu
         const findMenu = await Menu.findByPk(id_menu)
         if (findMenu) {
-            const foto_menu = req.file || findMenu.foto_menu
+            const file = req.file || findMenu.foto_menu
             const nama_menu = req.body.nama_menu || findMenu.nama_menu
             const harga_menu = req.body.harga_menu || findMenu.harga_menu
             const status = req.body.status || findMenu.status
@@ -161,7 +161,7 @@ const editMenu = async (req, res) => {
                     })
                 } else {
                     const updateMenu = await Menu.update({
-                        foto_menu: foto_menu.originalname,
+                        foto_menu: file.originalname,
                         nama_menu: nama_menu,
                         harga_menu: harga_menu,
                         status: status
@@ -185,7 +185,7 @@ const editMenu = async (req, res) => {
                 }
             } else {
                 const updateMenu = await Menu.update({
-                    foto_menu: foto_menu.originalname,
+                    foto_menu: file.originalname,
                     nama_menu: nama_menu,
                     harga_menu: harga_menu,
                     status: status
@@ -278,5 +278,20 @@ const hapusMenu = async (req, res) => {
     }
 }
 controllers.hapusMenu =[verifyToken, hapusMenu] 
+
+const manageView = async (req,res) => {
+    res.render('admin/menu/readMenu')
+}
+controllers.manageView = [manageView]
+
+const createView = async (req,res) => {
+    res.render('admin/menu/createMenu')
+}
+controllers.createView = [createView]
+
+const editView = async (req,res) => {
+    res.render('admin/menu/editMenu')
+}
+controllers.editView = [editView]
 
 module.exports = controllers

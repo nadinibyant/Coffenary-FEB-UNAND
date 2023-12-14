@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Reservation History</title>
+    <title>Order History</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -108,28 +108,25 @@
         <div class="container" id="nav">
             <ul class="nav nav-tabs justify-content-center text-center">
                 <li class="nav-item">
-                    <a class="nav-link active" aria-current="page" href="/historyUser">Reservation History</a>
+                    <a class="nav-link text-oranye" aria-current="page" href="/historyUser">Reservation History</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link text-oranye" href="/historyUserDelivery">Order Delivery</a>
+                    <a class="nav-link text-oranye active" href="/historyUserDelivery">Order Delivery</a>
                 </li>
             </ul>
         </div>
 
         <div class="container me-3 mt-5">
-            <h5 class="fw-bold pb-2 ">Reservation History</h5>
-            <p class="fw-light pb-4 ">Manage your table’s reservation</p>
+            <h5 class="fw-bold pb-2 ">Delivery Ordered History</h5>
+            <p class="fw-light pb-4 ">Manage your delivery ordered</p>
             <table class="table me-5 text-center table-striped">
                 <thead class="text-white">
                     <tr>
                         <td scope="col" class="col-1">No</td>
-                        <td scope="col" class="col-1">Reservation Date</td>
-                        <td scope="col" class="col-2">Reservation Time</td>
-                        <td scope="col" class="col-1">Number of Table</td>
-                        <td scope="col" class="col-1">Number of People</td>
-                        <td scope="col" class="col-1">Status</td>
-                        <td scope="col" class="col-2">Description</td>
-                        <td scope="col" class="col-3">Action</td>
+                        <td scope="col" class="col-3">Total Price</td>
+                        <td scope="col" class="col-3">Order Date</td>
+                        <td scope="col" class="col-3">Order Time</td>
+                        <td scope="col" class="col-2">Action</td>
                     </tr>
                 </thead>
                 <tbody id="formTableBody">
@@ -159,85 +156,49 @@
                 window.location.href = '/login';
             }
 
-            //Menampilkan data reservasi
+            // Return data 
             const tbody = document.getElementById("formTableBody");
             try{
-                const response = await fetch('/allDataHistory')
+                const response = await fetch('/allPesanan')
                 const data = await response.json();
 
                 if(data.success == true){
-                    const userReservations = data.dataHistory;
-                    const tableNumbers = data.nomor_meja;
-                    console.log(userReservations);
-                    console.log(tableNumbers);
+                    const orders = data.data;
                     var i = 1;
                     
-                    userReservations.forEach((reservation, index) => {
+                    orders.forEach((pesanan, index) => {
                         const tr = document.createElement("tr");
                         tbody.appendChild(tr);
 
                         const no = document.createElement("td")
-                        const reservationDate = document.createElement('td')
-                        const reservationTime = document.createElement('td')
-                        const numberTable = document.createElement("td")
-                        const amountPeople = document.createElement("td")
-                        const status = document.createElement("td")
-                        const keterangan = document.createElement("td")
+                        const totalHarga = document.createElement('td')
+                        const tanggalOrder = document.createElement('td')
+                        const jamOrder = document.createElement("td")
                         const action = document.createElement("td")
 
                         tbody.appendChild(tr)
                         tr.appendChild(no)
-                        tr.appendChild(reservationDate)
-                        tr.appendChild(reservationTime)
-                        tr.appendChild(numberTable)
-                        tr.appendChild(amountPeople)
-                        tr.appendChild(status)
-                        tr.appendChild(keterangan)
+                        tr.appendChild(totalHarga)
+                        tr.appendChild(tanggalOrder)
+                        tr.appendChild(jamOrder)
                         tr.appendChild(action)
+
+                        const createdAt = new Date(pesanan.created_at);
+                        const formattedDate = createdAt.toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' });
+                        const formattedTime = createdAt.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
 
                         no.setAttribute('scope', 'row')
                         no.innerHTML = i;
-                        reservationDate.innerHTML = reservation.tanggal_reservasi
-                        if (reservation.jam_mulai === "00:00:00" && reservation.jam_selesai === "00:00:00"){
-                            reservationTime.innerHTML = " - " 
-                        } else{
-                            reservationTime.innerHTML = reservation.jam_mulai + " - " + reservation.jam_selesai
-                        }
-                        numberTable.innerHTML = " Table " + tableNumbers[index]
-                        amountPeople.innerHTML = reservation.jumlah_orang + "  People"
-                        keterangan.innerHTML = reservation.keterangan
-
-                        //btn status
-                        const statusBedge = document.createElement("span")
-                        statusBedge.classList.add("badge", "p-2")
-                        statusBedge.textContent = reservation.status
-                        status.appendChild(statusBedge);
-                        if (reservation.status.toLowerCase() === 'canceled') {
-                            statusBedge.classList.add("bg-maroon", "text-white");
-                            statusBedge.style.backgroundColor = "maroon"
-                        } else if (reservation.status.toLowerCase() === 'completed') {
-                            statusBedge.classList.add("bg-success", "text-white");
-                        } else {
-                            statusBedge.classList.add("bg-blue", "text-white");
-                        }
+                        totalHarga.innerText = `Rp ${pesanan.total_harga.toLocaleString()}`;
+                        tanggalOrder.innerText = formattedDate;
+                        jamOrder.innerText = formattedTime;
                         i++;
-
-                        const cancelButton= document.createElement("button")
-                        const cancelIcon = document.createElement("iconify-icon");
-
+                    
                         const detailButton= document.createElement("button")
                         const detailIcon = document.createElement("iconify-icon");
 
-                        action.appendChild(cancelButton)
-                        cancelButton.setAttribute('data-id', reservation.id_reservasi);
-                        cancelButton.classList.add("btn", "btn-danger", "btnCancel", "mx-2");
-                        cancelButton.innerHTML = '<iconify-icon icon="iconoir:cancel"></iconify-icon> Cancel' ;
-                        cancelIcon.style.color = "white";
-                        cancelButton.appendChild(cancelIcon);
-
-                        //Detail Button
                         action.appendChild(detailButton)
-                        detailButton.setAttribute('data-id', reservation.id_reservasi);
+                        detailButton.setAttribute('data-id', pesanan.id_pesanan);
                         detailButton.classList.add("btn", "btn-primary", "btnDetail");
                         detailButton.innerHTML = '<iconify-icon icon="iconoir:menu"></iconify-icon> Details' ;
                         detailIcon.style.color = "white";
@@ -250,41 +211,12 @@
                 console.log(error);
             }
 
-            //Membatalkan Reservasi
-            const cancelButtons = document.querySelectorAll('.btnCancel');
-
-            cancelButtons.forEach((cancelButton) => {
-                cancelButton.addEventListener('click', async (event) => {
-                    const id_reservasi  = event.target.getAttribute('data-id');
-                    const confirmation = confirm('Are you sure to cancaled this reservation?');
-                    
-                    if(confirmation) {
-                        try{
-                            const response = await fetch(`/cancelReservation/${id_reservasi}`, {
-                                method: 'GET'
-                            }); 
-                            const data = await response.json();
-
-                            if (data.success == true) {
-                                alert(data.message)
-                                location.reload()
-                            } else if (data.success == false) {
-                                alert(data.message)
-                            }
-                        } catch (error) {
-                            console.error(error);
-                            alert('An error occurred while deleting the table.');
-                        }
-                    }
-                })
-            })
-
             //Details Reservasi
             const detailButtons = document.querySelectorAll('.btnDetail');
             detailButtons.forEach((detailButton) => {
                 detailButton.addEventListener('click', async (event) => {
-                    const id_reservasi  = event.target.getAttribute('data-id');
-                    window.location.href = `/detailReservation/${id_reservasi}`;
+                    const id_pesanan  = event.target.getAttribute('data-id');
+                    window.location.href = `/pesananDetailView/${id_pesanan}`;
                     
                 })
             });

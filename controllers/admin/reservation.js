@@ -310,7 +310,9 @@ const getDetailReservasi = async (req, res) => {
         const id_user = findReservasi.id_user
         const id_meja = findReservasi.id_meja
         const tanggal_reservasi = findReservasi.tanggal_reservasi
+        const jumlah_orang = findReservasi.jumlah_orang
         const jam_mulai = findReservasi.jam_mulai
+        const jam_selesai = findReservasi.jam_selesai
         const status = findReservasi.status
 
         const findUser = await User.findByPk(id_user)
@@ -320,6 +322,8 @@ const getDetailReservasi = async (req, res) => {
             const findMeja = await Meja.findByPk(id_meja)
             if (findMeja) {
                 const nomor_meja = findMeja.nomor_meja
+                const foto_meja = findMeja.foto_meja
+                const jumlah_kursi = findMeja.jumlah_kursi
 
                 const findAllMeja = await Meja.findAll()
                 if (findAllMeja.length > 0) {
@@ -350,8 +354,12 @@ const getDetailReservasi = async (req, res) => {
                                 dataReservasi: {
                                     full_name: full_name,
                                     nomor_meja: nomor_meja,
+                                    foto_meja: foto_meja,
+                                    jumlah_kursi: jumlah_kursi,
+                                    jumlah_orang: jumlah_orang,
                                     tanggal_reservasi: tanggal_reservasi,
                                     jam_mulai: jam_mulai,
+                                    jam_selesai: jam_selesai,
                                     status: status
                                 },
                                 dataNomorMeja: dataNomorMeja,
@@ -365,8 +373,12 @@ const getDetailReservasi = async (req, res) => {
                             dataReservasi: {
                                 full_name: full_name,
                                 nomor_meja: nomor_meja,
+                                foto_meja: foto_meja,
+                                jumlah_kursi: jumlah_kursi,
+                                jumlah_orang: jumlah_orang,
                                 tanggal_reservasi: tanggal_reservasi,
                                 jam_mulai: jam_mulai,
+                                jam_selesai: jam_selesai,
                                 status: status
                             },
                             dataNomorMeja: dataNomorMeja
@@ -510,6 +522,9 @@ const detailHistoryPesanan = async (req,res) => {
             model: User,
             attributes: ['full_name'],
             as: 'DataUser'
+        },
+        where: {
+            id_pesanan:id_pesanan
         }
     })
     if (dataPesanan) {
@@ -552,6 +567,9 @@ const dataPesanan = async (req,res) => {
             model: User,
             attributes: ['full_name'],
             as: 'DataUser'
+        },
+        where: {
+            id_reservasi: null
         }
     })
     if (semuaPesanan.length > 0) {
@@ -569,5 +587,21 @@ const dataPesanan = async (req,res) => {
     }
 }
 controllers.dataPesanan = [verifyToken, dataPesanan]
+
+const historyReservationView = async (req,res) => {
+    res.render('admin/history/detailHistory')
+}
+controllers.historyReservationView = [historyReservationView]
+
+const pesananDetail = async (req,res) => {
+    res.render('admin/history/historyMenuDetail')
+}
+controllers.pesananDetail = [pesananDetail]
+
+const dataPesananView = async (req,res) => {
+    res.render('admin/history/historyMenu')
+}
+controllers.dataPesananView = [dataPesananView]
+
 
 module.exports = controllers

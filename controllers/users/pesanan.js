@@ -144,7 +144,8 @@ const allPesanan = async (req, res) => {
                 as: 'DataUser'
             },
             where: {
-                id_user: id_user
+                id_user: id_user,
+                id_reservasi: null
             }
         })
         if (findAllPesanan.length > 0) {
@@ -169,20 +170,24 @@ const allPesanan = async (req, res) => {
 }
 controllers.allPesanan = [verifyToken, allPesanan]
 
-const detailPesananUser = async (req, res) => {
+const pesananDetailUser = async (req, res) => {
     const id_pesanan = req.params.id_pesanan
     const findDetail = await DetailPesanan.findAll({
-        include: {
+        include: [{
             model: Pesanan,
             as: 'DataPesanan'
         },
+        {
+            model: Menu,
+            as: 'DataMenu'
+        }],
         where: {
             id_pesanan: id_pesanan
         }
     })
-    if (findDetail) {
+    if (findDetail && findDetail.length > 0) {
         res.status(200).json({
-            success: false,
+            success: true,
             message: 'Order data found',
             data: findDetail
         })
@@ -193,7 +198,7 @@ const detailPesananUser = async (req, res) => {
         })
     }
 }
-controllers.detailPesananUser = [verifyToken, detailPesananUser]
+controllers.pesananDetailUser = [verifyToken, pesananDetailUser]
 
 const cekHarga = async (req, res) => {
     let pesanan = {};
@@ -275,5 +280,15 @@ const tampilMenuUser = async (req, res) => {
 
 }
 controllers.tampilMenuUser = [verifyToken, tampilMenuUser]
+
+const menuView = async (req,res) => {
+    res.render('users/menu/menu')
+}
+controllers.menuView = [menuView]
+
+const pesananDetail = async (req,res) => {
+    res.render('users/history/historyMenuDetail')
+}
+controllers.pesananDetail = [pesananDetail]
 
 module.exports = controllers
