@@ -444,6 +444,9 @@ const editReservation = async (req, res) => {
             } else {
                 const getTglReservasi = await Reservasi.findByPk(id_reservasi)
                 if (getTglReservasi) {
+                    const tanggalSekarang = new Date();
+                    tanggalSekarang.setHours(0, 0, 0, 0);
+
                     const tanggal_reservasi = getTglReservasi.tanggal_reservasi
                     const tanggal_Reservasi_objek = new Date(tanggal_reservasi)
                     const tanggal_reservasi_database = new Date(tanggal_Reservasi_objek.toISOString());
@@ -457,52 +460,60 @@ const editReservation = async (req, res) => {
                         }
                     })
 
-                    if (getIdMeja) {
-                        const id_meja = getIdMeja.id_meja
-
-                        const findReservasi = await Reservasi.findOne({
-                            where: {
-                                id_meja: id_meja,
-                                tanggal_reservasi: tanggal_reservasi_database,
-                                jam_mulai: jam_mulai
-                            }
-                        })
-
-                        if (findReservasi) {
-                            res.status(400).json({
-                                success: false,
-                                message: 'The table has been booked'
-                            })
-                        } else {
-                            const keterangan = `Your reservation table has been moved to number ${nomor_meja}`
-                            const updateReservasi = await Reservasi.update({
-                                id_meja: id_meja,
-                                keterangan: keterangan
-                            }, {
+                    if (tanggalSekarang == tanggal_reservasi_database) {
+                        if (getIdMeja) {
+                            const id_meja = getIdMeja.id_meja
+    
+                            const findReservasi = await Reservasi.findOne({
                                 where: {
-                                    id_reservasi: id_reservasi
+                                    id_meja: id_meja,
+                                    tanggal_reservasi: tanggal_reservasi_database,
+                                    jam_mulai: jam_mulai
                                 }
                             })
-
-                            if (updateReservasi) {
-                                res.status(200).json({
-                                    success: true,
-                                    message: 'Reservation data updated successfully',
-                                    keterangan: keterangan
+    
+                            if (findReservasi) {
+                                res.status(400).json({
+                                    success: false,
+                                    message: 'The table has been booked'
                                 })
                             } else {
-                                res.status(400).json({
-                                    success: true,
-                                    message: 'Reservation data was not updated successfully'
+                                const keterangan = `Your reservation table has been moved to number ${nomor_meja}`
+                                const updateReservasi = await Reservasi.update({
+                                    id_meja: id_meja,
+                                    keterangan: keterangan
+                                }, {
+                                    where: {
+                                        id_reservasi: id_reservasi
+                                    }
                                 })
+    
+                                if (updateReservasi) {
+                                    res.status(200).json({
+                                        success: true,
+                                        message: 'Reservation data updated successfully',
+                                        keterangan: keterangan
+                                    })
+                                } else {
+                                    res.status(400).json({
+                                        success: true,
+                                        message: 'Reservation data was not updated successfully'
+                                    })
+                                }
                             }
+                        } else {
+                            res.status(400).json({
+                                success: false,
+                                message: 'Table not Found'
+                            })
                         }
                     } else {
                         res.status(400).json({
                             success: false,
-                            message: 'Table not Found'
+                            message: 'Cannot change data, reservation date has passed'
                         })
                     }
+                    
                 } else {
                     res.status(400).json({
                         success: false,
