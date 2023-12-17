@@ -120,12 +120,12 @@
             <table class="table me-5 text-center table-striped">
                 <thead class="text-white">
                     <tr>
-                        <td scope="col" class="p-4 col-1">No</td>
-                        <td scope="col" class="p-4 col-3">Menu’s Photo</td>
-                        <td scope="col" class="p-4 col-3">Menu’s Name</td>
-                        <td scope="col" class="p-4 col-2">Menu’s Price</td>
-                        <td scope="col" class="p-4 col-1">Status</td>
-                        <td scope="col" class="p-4 col-2">Action</td>
+                        <td scope="col" class="p-4">No</td>
+                        <td scope="col" class="p-4">Menu’s Photo</td>
+                        <td scope="col" class="p-4">Menu’s Name</td>
+                        <td scope="col" class="p-4">Menu’s Price</td>
+                        <td scope="col" class="p-4">Status</td>
+                        <td scope="col" class="p-4">Action</td>
                     </tr>
                 </thead>
                 <tbody class="text-center " id="formTableBody">
@@ -202,10 +202,13 @@
 
                     //img meja
                     const img = document.createElement("img");
-                    img.style.height = "30 0px";
                     img.classList.add("img-thumbnail");
                     img.alt = "Menu's Image";
                     img.src = `/img/menu/${menu.foto_menu}`;
+                    img.style.objectFit = "cover"; 
+                    img.style.width = "300px";
+                    img.style.height = "300px";
+                    
                     //drop img meja
                     photo.style.display = "flex";
                     photo.style.justifyContent = "center";

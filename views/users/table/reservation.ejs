@@ -293,17 +293,20 @@
                     menuList.forEach(menu => {
                         const menuCard = document.createElement('div');
                         menuCard.classList.add('menuCard', 'col', 'mb-4');
-
                         menuCard.dataset.menuId = menu.id_menu;
 
                         const cardInner = document.createElement('div');
                         cardInner.classList.add('card');
-                        cardInner.style.width = '16rem';
+                        cardInner.style.width = '18rem';
 
                         const img = document.createElement('img');
                         img.src = `/img/menu/${menu.foto_menu}`;
-                        img.classList.add('card-img-top', 'p-4', 'pb-0');
+                        img.classList.add('card-img-top', 'p-4', 'pb-0', 'background-size');
+                        img.style.width = "100%";
+                        img.style.objectFit = "cover"; 
+                        img.style.height = "275px";
                         img.alt = "Menu Image";
+                        
 
                         const cardBody = document.createElement('div');
                         cardBody.classList.add('card-body', 'p-4');

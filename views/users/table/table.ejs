@@ -154,6 +154,9 @@
                         image.src = `/img/meja/${table.foto_meja}`;
                         image.classList.add("card-img-top", "p-4", "pb-0");
                         image.alt = "Table Image";
+                        image.style.objectFit = "cover"; 
+                        image.style.width = "100%";
+                        image.style.height = "275px";
 
                         const cardBody = document.createElement("div");
                         cardBody.classList.add("card-body", "p-4");

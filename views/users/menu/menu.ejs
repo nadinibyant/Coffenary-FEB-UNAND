@@ -179,6 +179,9 @@
                         img.src = `/img/menu/${menu.foto_menu}`;
                         img.classList.add('card-img-top', 'p-4', 'pb-0');
                         img.alt = "Menu Image";
+                        img.style.objectFit = "cover"; 
+                        img.style.width = "100%";
+                        img.style.height = "275px";
 
                         const cardBody = document.createElement('div');
                         cardBody.classList.add('card-body', 'p-4');

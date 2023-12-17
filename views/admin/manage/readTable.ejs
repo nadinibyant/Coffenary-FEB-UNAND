@@ -185,10 +185,13 @@
                     amountChair.innerHTML = dataTable.jumlah_kursi + " Seats"
                     //img meja
                     const img = document.createElement("img");
-                    img.style.height = "300px";
                     img.classList.add("img-thumbnail");
                     img.alt = "Table Image";
                     img.src = `/img/meja/${dataTable.foto_meja}`;
+                    img.style.objectFit = "cover"; 
+                    img.style.width = "300px";
+                    img.style.height = "300px";
+
                     //drop img meja
                     photo.style.display = "flex";
                     photo.style.justifyContent = "center";
